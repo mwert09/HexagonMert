@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db74a94075948884680778d12d041d92, type: 3}
+  m_Name: OrangeHexagonPiece
+  m_EditorClassIdentifier: 
+  stringName: Orange Hexagon
+  color: {fileID: 11400000, guid: f6f3bb89d0728b14eb2cf4f7a68e2258, type: 2}

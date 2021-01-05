@@ -14,15 +14,21 @@ public class Grid : MonoBehaviour
     public GameObject cellPrefab;
 
     // Cell array in this grid
-    private Cell[,] m_allCells;
+    public Cell[,] m_allCells;
+    // Hexagon holder array to hold hexagons
+    public HexagonHolder[,] m_allHexagons;
     // We have to change our x and y values based on an offset to create our grid
-    private float xOffset = 0.759f;
-    private float yOffset = -0.44f;
+    public float xOffset = 0.759f;
+    public float yOffset = -0.44f;
+
+    public Cell m_clickedCell;
+    public HexagonHolder[] m_selectedHexagonGroup;
 
     private void Awake()
     {
         // Initialize cell array
         m_allCells = new Cell[width, height];
+        m_allHexagons = new HexagonHolder[width, height];
     }
 
     // Start is called before the first frame update
@@ -63,7 +69,7 @@ public class Grid : MonoBehaviour
                 }
                 catch (NullReferenceException ex)
                 {
-                    Debug.Log("Something went wrong with Cell array");
+                    Debug.Log("Something went wrong with Cell array" + ex.ToString());
                 }
             }
         }
@@ -78,4 +84,6 @@ public class Grid : MonoBehaviour
     {
         return -yOffset * height;
     }
+
+    
 }

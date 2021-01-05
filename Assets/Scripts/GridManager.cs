@@ -7,6 +7,7 @@ public class GridManager : MonoBehaviour
     public static GridManager instance;
 
     public List<Grid> gridList;
+    public GameObject[] hexagonPrefabs;
 
     private void Awake()
     {
@@ -17,6 +18,32 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         InitGrids();
+        FillGridsWithRandom();
+    }
+
+    /*
+    private void SetGridVisible(bool tf)
+    {
+        if (tf)
+        {
+            for (int i = 0; i < gridList.Capacity; i++)
+            {
+                
+            }
+        }
+        else
+        {
+
+        }
+    }
+    */
+
+    private void FillGridsWithRandom()
+    {
+        for (int i = 0; i < gridList.Capacity; i++)
+        {
+            GridUtils.instance.FillRandom(i);
+        }
     }
 
     private void InitGrids()
