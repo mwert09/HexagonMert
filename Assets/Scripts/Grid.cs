@@ -68,4 +68,14 @@ public class Grid : MonoBehaviour
             }
         }
     }
+
+    public float GetWidth()
+    {
+        return xOffset * width;
+    }
+
+    public float GetHeight()
+    {
+        return -yOffset * height;
+    }
 }
