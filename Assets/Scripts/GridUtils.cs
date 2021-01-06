@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GridUtils : MonoBehaviour
 {
     public static GridUtils instance;
+
+    public bool alreadyRotation = false;
 
     enum Selection
     {
@@ -245,6 +248,101 @@ public class GridUtils : MonoBehaviour
         } while (!shouldNotLoop);
         
         return hexagons;
+    }
+
+    public void Rotate(bool clockwise)
+    {
+        if (!alreadyRotation)
+        {
+            alreadyRotation = true; 
+            StartCoroutine(RotationRoutine(clockwise));
+        }
+    }
+
+    private IEnumerator RotationRoutine(bool clockwise)
+    {
+        // Rotate hexagon group and check game board if there is an explosion(3 color match) break the loop
+        for (int i = 0; i < 3; i++)
+        {
+            SwapHexagonGroup(clockwise);
+            Debug.Log("Rutin : " + i);
+            yield return new WaitForSeconds(0.7f);
+
+            // Check explosion(3 match)
+        }
+
+        alreadyRotation = false;
+
+    }
+
+    //TODO: Change this function to support multiple grids
+    // Right now only for first grid
+    public Vector2 FindMiddlePoint()
+    {
+        Vector2 middlePos = Vector2.zero;
+        for (int i = 0; i < 3; i++)
+        {
+            middlePos.x += GridManager.instance.gridList[0].m_selectedHexagonGroup[i].transform.position.x;
+            middlePos.y += GridManager.instance.gridList[0].m_selectedHexagonGroup[i].transform.position.y;
+        }
+
+        middlePos.x = middlePos.x / 3;
+        middlePos.y = middlePos.y / 3;
+        return middlePos;
+    }
+
+    public void SwapHexagonGroup(bool clockwise)
+    {
+        // For now we only rotate for the first grid
+        // only rotate if a hexagon is selected
+        HexagonHolder[] selectedHexagonGroup = GridManager.instance.gridList[0].m_selectedHexagonGroup;
+        if (selectedHexagonGroup[0] != null && selectedHexagonGroup[1] != null && selectedHexagonGroup[2] != null)
+        {
+            Vector2 firstHexagonPos, secondHexagonPos, thirdHexagonPos;
+            HexagonHolder first, second, third;
+
+            first = selectedHexagonGroup[0];
+            second = selectedHexagonGroup[1];
+            third = selectedHexagonGroup[2];
+
+            firstHexagonPos = first.transform.position;
+            secondHexagonPos = second.transform.position;
+            thirdHexagonPos = third.transform.position;
+
+            if (clockwise == false)
+            {
+                first.SetCoord(second.xIndex, second.yIndex);
+                first.Animate(secondHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[second.xIndex, second.yIndex] = first;
+
+                second.SetCoord(third.xIndex, third.yIndex);
+                second.Animate(thirdHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[third.xIndex, third.yIndex] = second;
+
+                third.SetCoord(third.xIndex, third.yIndex);
+                third.Animate(firstHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[first.xIndex, first.yIndex] = third;
+            }
+            else
+            {
+                first.SetCoord(third.xIndex, third.yIndex);
+                first.Animate(thirdHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[third.xIndex, third.yIndex] = first;
+
+                second.SetCoord(first.xIndex, first.yIndex);
+                second.Animate(firstHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[first.xIndex, first.yIndex] = second;
+
+                third.SetCoord(second.xIndex, second.yIndex);
+                third.Animate(secondHexagonPos, clockwise);
+                GridManager.instance.gridList[0].m_allHexagons[second.xIndex, second.yIndex] = third;
+            }
+        }
+        else
+        {
+            return;
+        }
+        
     }
 
     
