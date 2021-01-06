@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5277946151021041771}
   - component: {fileID: -8703988230059679544}
   m_Layer: 0
-  m_Name: HexagonPrefab
+  m_Name: RedHexagonPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -98,3 +98,4 @@ MonoBehaviour:
   hexagon: {fileID: 11400000, guid: da0e21abc5b041b4799f1c2b36a171cb, type: 2}
   xIndex: 0
   yIndex: 0
+  rotationSpeed: 5

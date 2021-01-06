@@ -98,3 +98,4 @@ MonoBehaviour:
   hexagon: {fileID: 11400000, guid: 193f2915a8b91184a9562b5ee70ce561, type: 2}
   xIndex: 0
   yIndex: 0
+  rotationSpeed: 5

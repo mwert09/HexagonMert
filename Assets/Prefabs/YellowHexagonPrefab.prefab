@@ -10,10 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1724234787694412324}
   - component: {fileID: 5277946151021041771}
-  - component: {fileID: 5530125730725666095}
-  - component: {fileID: -1451916342596819303}
-  m_Layer: 8
-  m_Name: CellPrefab
+  - component: {fileID: -8703988230059679544}
+  m_Layer: 0
+  m_Name: YellowHexagonPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74,7 +73,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 95238b0062801d9468314d3ed0e48901, type: 3}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -84,7 +83,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5530125730725666095
+--- !u!114 &-8703988230059679544
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,25 +92,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3220366127667385168}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff82d5312ea2fae4e95a6808588882c9, type: 3}
+  m_Script: {fileID: 11500000, guid: 44cc8a30d951e604ab132568e8aa8207, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hexagon: {fileID: 11400000, guid: 251ff29082c0d0347b3342db1b889bf8, type: 2}
   xIndex: 0
   yIndex: 0
-  m_Grid: {fileID: 0}
---- !u!58 &-1451916342596819303
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3220366127667385168}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.44
+  rotationSpeed: 5

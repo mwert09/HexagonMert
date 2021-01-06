@@ -323,7 +323,7 @@ MonoBehaviour:
   xOffset: 0.759
   yOffset: -0.44
   m_clickedCell: {fileID: 0}
-  m_selectedCellGroup: []
+  m_selectedHexagonGroup: []
 --- !u!4 &673156935
 Transform:
   m_ObjectHideFlags: 0
@@ -375,6 +375,8 @@ MonoBehaviour:
   - {fileID: 3220366127667385168, guid: 490c8e26ce393714699560621f5a1f46, type: 3}
   - {fileID: 3220366127667385168, guid: 1049c2e67fc7cd24586827268e468435, type: 3}
   - {fileID: 3220366127667385168, guid: b96656defcec62c41b2a3467cb99c122, type: 3}
+  - {fileID: 3220366127667385168, guid: 8a18a5c9ac354c044bd388753019508f, type: 3}
+  - {fileID: 3220366127667385168, guid: 2f0d04c60c8bdb94abbd5de77d6128d7, type: 3}
 --- !u!4 &1353962817
 Transform:
   m_ObjectHideFlags: 0
@@ -401,6 +403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d48cbd2af3e2744f8f92481bdf682d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alreadyRotating: 0
 --- !u!1 &1908763181
 GameObject:
   m_ObjectHideFlags: 0

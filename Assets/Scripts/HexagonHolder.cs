@@ -7,12 +7,16 @@ public class HexagonHolder : MonoBehaviour
     public HexagonPieceSO hexagon;
     public int xIndex;
     public int yIndex;
+    public int rotationSpeed;
 
     private bool animate = false;
     private Vector2 newPosToAnimate;
     private Vector2 middle;
     private bool clockwise;
 
+    private bool is_falling = false;
+    private float fallXCoord;
+    private float fallYCoord;
 
     private void Awake()
     {
@@ -38,13 +42,11 @@ public class HexagonHolder : MonoBehaviour
 
             if (clockwise)
             {
-                Debug.Log("clockwise");
-                transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * 360.0f);
+                transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * 120.0f * rotationSpeed);
             }
             else
             {
-                Debug.Log(" counter clockwise");
-                transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * -360.0f);
+                transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * -120.0f * rotationSpeed);
             }
             
             if (Vector3.Distance(transform.position, newPosToAnimate) < 0.1f)
@@ -52,6 +54,17 @@ public class HexagonHolder : MonoBehaviour
                 transform.position = newPosToAnimate;
                 transform.rotation  = Quaternion.Euler(0,0,0);
                 animate = false;
+            }
+        }
+
+        if (is_falling)
+        {
+            transform.position = new Vector3(fallXCoord, Mathf.Lerp(transform.position.y, fallYCoord, 0.2f), 0f);
+            if (Vector3.Distance(transform.position, new Vector3(fallXCoord, fallYCoord, 0f)) < 0.1f)
+            {
+                transform.position = new Vector3(fallXCoord, fallYCoord, 0f);
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                is_falling = false;
             }
         }
     }
@@ -62,12 +75,19 @@ public class HexagonHolder : MonoBehaviour
         yIndex = y;
     }
 
-    public void Animate(Vector2 newPos, bool clockwise)
+    public void Animate(Vector2 newPos, bool clockwiseb)
     {
         newPosToAnimate = newPos;
-        clockwise = this.clockwise;
+        clockwise = clockwiseb;
         middle = GridUtils.instance.FindMiddlePoint();
         animate = true;
+    }
+
+    public void Fall(int newX, int newY)
+    {
+        fallXCoord = GridManager.instance.gridList[0].m_allCells[newX, newY].transform.position.x;
+        fallYCoord = GridManager.instance.gridList[0].m_allCells[newX, newY].transform.position.y;
+        is_falling = true;
     }
 
     
