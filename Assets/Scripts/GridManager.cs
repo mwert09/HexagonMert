@@ -23,24 +23,9 @@ public class GridManager : MonoBehaviour
     {
         InitGrids();
         FillGridsWithRandom();
+       GridUtils.instance.ExplodeStartingMatches(false);
     }
 
-    /*
-    private void SetGridVisible(bool tf)
-    {
-        if (tf)
-        {
-            for (int i = 0; i < gridList.Capacity; i++)
-            {
-                
-            }
-        }
-        else
-        {
-
-        }
-    }
-    */
 
     private void FillGridsWithRandom()
     {

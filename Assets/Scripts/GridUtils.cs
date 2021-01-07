@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
@@ -34,6 +36,12 @@ public class GridUtils : MonoBehaviour
         public Vector2 bottom;
         public Vector2 bottomLeft;
         public Vector2 bottomRight;
+    }
+
+    public struct HexagonPair
+    {
+        public HexagonHolder first;
+        public HexagonHolder second;
     }
 
     HexagonHolder[] explosionList = new HexagonHolder[3];
@@ -395,10 +403,11 @@ public class GridUtils : MonoBehaviour
                    
             }
         }
-
+        
         FillAfterExplosion();
         alreadyRotating = false;
 
+        
     }
 
     public void DecreaseBombTimers(List<HexagonHolder> bombList)
@@ -482,6 +491,13 @@ public class GridUtils : MonoBehaviour
             }
         }
 
+        /*if ((tempList[0].color == tempList[1].color) || (tempList[2].color == tempList[0].color))
+        {
+            int randomIdx = Random.Range(0, 2);
+            int randomColorIdx = Random.Range(0, GridManager.instance.colorList.Count - 1);
+            tempList[randomIdx].color = GridManager.instance.colorList[randomColorIdx];
+        }*/
+
         if (bombScore - UIManager.instance.score <= 0)
         {
             //Create a bomb
@@ -490,6 +506,15 @@ public class GridUtils : MonoBehaviour
             GridManager.instance.bombList.Add(tempList[bombIndex]);
             bombScore += 1000;
         }
+
+        ExplodeStartingMatches(true);
+
+        if (!CheckPossibleMoves())
+        {
+            Debug.Log("Game End");
+            GameFlowManager.instance.SetGameEnd();
+        }
+
     }
 
     public bool CheckMatch(HexagonHolder hexagon, Grid grid)
@@ -624,8 +649,439 @@ public class GridUtils : MonoBehaviour
         
     }
 
-   
+    // Currently works for only the first grid
+    // Checks if there are possible moves and if not game ends
+    // TODO: We might want to find a better way to do this
+    // This is an expensive function
+    public bool CheckPossibleMoves()
+    {
+        List<List<HexagonPair>> pairList = new List<List<HexagonPair>>();
+        // Check every hexagon for possible locations and matches
+        for (int i = 0; i < GridManager.instance.gridList[0].width - 1; i++)
+        {
+            for (int j = 0; j < GridManager.instance.gridList[0].height - 1; j++)
+            {
+                HexagonHolder currentHexagon = GridManager.instance.gridList[0].m_allHexagons[j, i];
+                // To get every possible location we need to get neighbours
+                NeighbourHexagons neighbours = GetNeighbourHexagons(currentHexagon);
+                // Array of hexagonholders to store possible match
+                HexagonHolder[] possibleMatch = new HexagonHolder[3];
+                // Find adjacent hexagons with the same color
+                pairList.Add(FindPairGroup(currentHexagon));
+                // Check if any neighbouring group contains the color we need
+                
+            }
+        }
+
+        int possibleMatches = 0;
+        foreach (List<HexagonPair> pair in pairList)
+        {
+            foreach (HexagonPair hexpair in pair)
+            {
+                
+                if (CheckNeighbouringGroupForColor(hexpair))
+                {
+                    possibleMatches++;
+                }
+            }
+            
+        }
+
+        if (possibleMatches > 0)
+        {
+            return true;
+        }
+
+        return false;
+
+    }
 
     
+    public bool CheckNeighbouringGroupForColor(HexagonPair pair)
+    {
+        int samecolorCount = 0;
+        Grid currentGrid = GridManager.instance.gridList[0];
+        NeighbourHexagons pairNeighbourHexagons = new NeighbourHexagons();
+        NeighbourHexagons secondNeighbourHexagons = new NeighbourHexagons();
+
+        // Top Bottom
+        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex && pair.first.yIndex == pair.second.yIndex - 1)
+        {
+            pairNeighbourHexagons =
+                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex - 1, (pair.first.yIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
+            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex + 1,
+                (pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
+        }
+
+        // Top right Bottom left
+        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex - 1 == pair.second.xIndex && pair.first.yIndex ==
+            ((pair.first.xIndex % 2 == 0) ? pair.second.yIndex : pair.second.yIndex + 1))
+        {
+            pairNeighbourHexagons =
+                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
+            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
+                pair.first.yIndex + 1]);
+        }
+
+        // Top left Bottom right
+
+        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex - 1 && pair.first.yIndex == 
+            ((pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1))
+        {
+            pairNeighbourHexagons =
+                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
+            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
+                pair.first.yIndex + 1]);
+        }
+       
+
+        if (pairNeighbourHexagons.top.x < 0 || pairNeighbourHexagons.top.x > (currentGrid.width - 1) || pairNeighbourHexagons.top.y < 0 ||
+            pairNeighbourHexagons.top.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            // CHECK COLORS
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.top.x, (int)pairNeighbourHexagons.top.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        // second neighbours
+        if (secondNeighbourHexagons.top.x < 0 || secondNeighbourHexagons.top.x > (currentGrid.width - 1) || secondNeighbourHexagons.top.y < 0 ||
+            secondNeighbourHexagons.top.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.top.x, (int)secondNeighbourHexagons.top.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        if (pairNeighbourHexagons.topLeft.x < 0 || pairNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.topLeft.y < 0 ||
+            pairNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topLeft.x, (int)pairNeighbourHexagons.topLeft.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        // second
+        if (pairNeighbourHexagons.topLeft.x < 0 || pairNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.topLeft.y < 0 ||
+            pairNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topLeft.x, (int)secondNeighbourHexagons.topLeft.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+
+        if (pairNeighbourHexagons.bottomLeft.x < 0 || pairNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomLeft.y < 0 ||
+            pairNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomLeft.x, (int)pairNeighbourHexagons.bottomLeft.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        // second
+        if (secondNeighbourHexagons.bottomLeft.x < 0 || secondNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomLeft.y < 0 ||
+            secondNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomLeft.x, (int)secondNeighbourHexagons.bottomLeft.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+
+        if (pairNeighbourHexagons.bottom.x < 0 ||
+            pairNeighbourHexagons.bottom.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottom.y < 0 ||
+            pairNeighbourHexagons.bottom.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottom.x, (int)pairNeighbourHexagons.bottom.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        //second 
+        if (secondNeighbourHexagons.bottom.x < 0 ||
+            secondNeighbourHexagons.bottom.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottom.y < 0 ||
+            secondNeighbourHexagons.bottom.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottom.x, (int)secondNeighbourHexagons.bottom.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        if (pairNeighbourHexagons.topRight.x < 0 || pairNeighbourHexagons.topRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.topRight.y < 0 ||
+            pairNeighbourHexagons.topRight.y > (currentGrid.height - 1))
+        {
+
+        }
+
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topRight.x, (int)pairNeighbourHexagons.topRight.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        // second
+        if (secondNeighbourHexagons.topRight.x < 0 || secondNeighbourHexagons.topRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.topRight.y < 0 ||
+            secondNeighbourHexagons.topRight.y > (currentGrid.height - 1))
+        {
+
+        }
+
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topRight.x, (int)secondNeighbourHexagons.topRight.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        if (pairNeighbourHexagons.bottomRight.x < 0 ||
+            pairNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomRight.y < 0 ||
+            pairNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomRight.x, (int)pairNeighbourHexagons.bottomRight.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        //second 
+        if (secondNeighbourHexagons.bottomRight.x < 0 ||
+            secondNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomRight.y < 0 ||
+            secondNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomRight.x, (int)secondNeighbourHexagons.bottomRight.y].color ==
+                pair.first.color)
+            {
+                samecolorCount++;
+            }
+        }
+
+        if (samecolorCount > 4)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+
+    public List<HexagonPair> FindPairGroup(HexagonHolder currentHexagon)
+    {
+        Grid currentGrid = GridManager.instance.gridList[0];
+        List<HexagonPair> allPairs = new List<HexagonPair>();
+        NeighbourHexagons neighbours = GetNeighbourHexagons(currentHexagon);
+
+        // BOTTOM
+        if (neighbours.bottom.x < 0 || neighbours.bottom.x > (currentGrid.width - 1) || neighbours.bottom.y < 0 ||
+            neighbours.bottom.y > (currentGrid.height - 2))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].color == currentHexagon.color)
+            {
+                HexagonPair foundHexagonPair;
+                foundHexagonPair.first = currentHexagon;
+                foundHexagonPair.second = currentGrid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y];
+                allPairs.Add(foundHexagonPair);
+            }
+        }
+
+        // Top Right Bottom Left
+
+        if (neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > (currentGrid.width - 1) || neighbours.bottomLeft.y < 0 ||
+            neighbours.bottomLeft.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].color == currentHexagon.color)
+            {
+                HexagonPair foundHexagonPair;
+                foundHexagonPair.first = currentHexagon;
+                foundHexagonPair.second = currentGrid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y];
+                allPairs.Add(foundHexagonPair);
+            }
+        }
+
+        // Top Left Bottom Right
+
+        if (neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > (currentGrid.width - 1) || neighbours.bottomRight.y < 0 ||
+            neighbours.bottomRight.y > (currentGrid.height - 1))
+        {
+
+        }
+        else
+        {
+            if (currentGrid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].color == currentHexagon.color)
+            {
+                HexagonPair foundHexagonPair;
+                foundHexagonPair.first = currentHexagon;
+                foundHexagonPair.second = currentGrid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y];
+                allPairs.Add(foundHexagonPair);
+            }
+        }
+
+        return allPairs;
+    }
+
+    public void ExplodeStartingMatches(bool shouldAddScore)
+    {
+        Grid currentGrid = GridManager.instance.gridList[0];
+        for (int i = 0; i < currentGrid.width - 1; i++)
+        {
+            for (int j = 0; j < currentGrid.height - 1; j++)
+            {
+                if (i == 0)
+                {
+                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    {
+                        // check right
+                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
+                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        {
+                            // Explode
+                            HexagonHolder[] explosionList = new HexagonHolder[3];
+                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                            explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
+                            explosionList[2] = (tempHexagon);
+                            if (ExplodeGroup(explosionList, currentGrid))
+                            {
+                                if (shouldAddScore)
+                                {
+                                    UIManager.instance.IncreaseScore();
+                                }
+                                MakeHexagonsFall();
+                                FillAfterExplosion();
+                            }
+                        }
+                    }
+                }
+                if(i == currentGrid.width - 1)
+                {
+                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    {
+                        // check left
+                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
+                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        {
+                            // Explode
+                            HexagonHolder[] explosionList = new HexagonHolder[3];
+                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                            explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
+                            explosionList[2] = (tempHexagon);
+                            if (ExplodeGroup(explosionList, currentGrid))
+                            {
+                                MakeHexagonsFall();
+                                FillAfterExplosion();
+                            }
+                        }
+                    }
+                }
+                if(i > 0 && i < currentGrid.width - 1)
+                {
+                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    {
+                        // check both sides
+                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
+                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        {
+                            // Explode
+                            HexagonHolder[] explosionList = new HexagonHolder[3];
+                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                            explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
+                            explosionList[2] = (tempHexagon);
+                            if (ExplodeGroup(explosionList, currentGrid))
+                            {
+                                MakeHexagonsFall();
+                                FillAfterExplosion();
+                            }
+                        }
+                        tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
+                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        {
+                            // Explode
+                            HexagonHolder[] explosionList = new HexagonHolder[3];
+                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                            explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
+                            explosionList[2] = (tempHexagon);
+                            if (ExplodeGroup(explosionList, currentGrid))
+                            {
+                                MakeHexagonsFall();
+                                FillAfterExplosion();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }
