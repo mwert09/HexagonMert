@@ -11,6 +11,8 @@ public class GridUtils : MonoBehaviour
     public static GridUtils instance;
 
     public bool alreadyRotating = false;
+    
+    private int bombScore = 1000;
 
     enum Selection
     {
@@ -56,13 +58,21 @@ public class GridUtils : MonoBehaviour
 
     public GameObject GetRandomPiece()
     {
-        int randomIndex = Random.Range(0, GridManager.instance.hexagonPrefabs.Length);
-        if (GridManager.instance.hexagonPrefabs[randomIndex] == null)
+        int randomColorIndex = Random.Range(0, GridManager.instance.colorList.Count);
+        int randomPrefabIndex = Random.Range(0, GridManager.instance.hexagonPrefabs.Length);
+        if (GridManager.instance.colorList[randomColorIndex] == null)
         {
-            Debug.Log("Grid: " + randomIndex + "does not contain a valid hexagon prefab");
+            Debug.Log("Grid: " + randomColorIndex + "does not contain a valid color");
         }
 
-        return GridManager.instance.hexagonPrefabs[randomIndex];
+        if (GridManager.instance.hexagonPrefabs[randomPrefabIndex] == null)
+        {
+            Debug.Log("Grid: " + randomPrefabIndex + "does not contain a valid prefab");
+        }
+
+        GameObject hexagonToSpawn = GridManager.instance.hexagonPrefabs[randomPrefabIndex];
+        hexagonToSpawn.GetComponent<HexagonHolder>().color = GridManager.instance.colorList[randomColorIndex];
+        return hexagonToSpawn;
     }
 
     public void PlaceGamePiece(HexagonHolder hexagon, float xPos, float yPos, int x, int y)
@@ -172,10 +182,10 @@ public class GridUtils : MonoBehaviour
         switch (selection)
         {
             case Selection.TOP_LEFT:
-                if (neighbours.top == null || neighbours.topLeft == null || neighbours.top.x < 0 || neighbours.top.x > grid.width || neighbours.top.y < 0 ||
-                    neighbours.top.y > grid.height || neighbours.topLeft.x < 0 ||
-                    neighbours.topLeft.x > grid.width || neighbours.topLeft.y < 0 ||
-                    neighbours.topLeft.y > grid.height)
+                if (neighbours.top.x < 0 || neighbours.top.x > (grid.width - 1) || neighbours.top.y < 0 ||
+                    neighbours.top.y > (grid.height - 1) || neighbours.topLeft.x < 0 ||
+                    neighbours.topLeft.x > (grid.width - 1) || neighbours.topLeft.y < 0 ||
+                    neighbours.topLeft.y > (grid.height - 1))
                 {
                     goto case Selection.TOP_RIGHT;
                 }
@@ -184,46 +194,45 @@ public class GridUtils : MonoBehaviour
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.top.x, (int) neighbours.top.y];
                 break;
             case Selection.TOP_RIGHT:
-                if (neighbours.top == null || neighbours.topRight == null || neighbours.top.x < 0 || neighbours.top.x > grid.width || neighbours.top.y < 0 ||
-                    neighbours.top.y > grid.height || neighbours.topRight.x < 0 ||
-                    neighbours.topRight.x > grid.width || neighbours.topRight.y < 0 ||
-                    neighbours.topRight.y > grid.height)
+                if (neighbours.top.x < 0 || neighbours.top.x > (grid.width - 1) || neighbours.top.y < 0 ||
+                    neighbours.top.y > (grid.height - 1) || neighbours.topRight.x < 0 ||
+                    neighbours.topRight.x > (grid.width - 1) || neighbours.topRight.y < 0 ||
+                    neighbours.topRight.y > (grid.height - 1))
                 {
                     goto case Selection.LEFT;
                 }
-
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.top.x, (int) neighbours.top.y];
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.topRight.x, (int) neighbours.topRight.y];
                 break;
             case Selection.LEFT:
-                if (neighbours.topLeft == null || neighbours.bottomLeft == null || neighbours.topLeft.x < 0 || neighbours.topLeft.x > grid.width || neighbours.topLeft.y < 0 ||
-                    neighbours.topLeft.y > grid.height || neighbours.bottomLeft.x < 0 ||
-                    neighbours.bottomLeft.x > grid.width || neighbours.bottomLeft.y < 0 ||
-                    neighbours.bottomLeft.y > grid.height)
+                if (neighbours.topLeft.x < 0 || neighbours.topLeft.x > (grid.width - 1) || neighbours.topLeft.y < 0 ||
+                    neighbours.topLeft.y > (grid.height - 1) || neighbours.bottomLeft.x < 0 ||
+                    neighbours.bottomLeft.x > (grid.width - 1) || neighbours.bottomLeft.y < 0 ||
+                    neighbours.bottomLeft.y > (grid.height - 1))
                 {
                     goto case Selection.RIGHT;
                 }
 
-                hexagons[1] = grid.m_allHexagons[(int) neighbours.topLeft.x, (int) neighbours.topLeft.y];
-                hexagons[2] = grid.m_allHexagons[(int) neighbours.bottomLeft.x, (int) neighbours.bottomLeft.y];
+                hexagons[2] = grid.m_allHexagons[(int) neighbours.topLeft.x, (int) neighbours.topLeft.y];
+                hexagons[1] = grid.m_allHexagons[(int) neighbours.bottomLeft.x, (int) neighbours.bottomLeft.y];
                 break;
             case Selection.RIGHT:
-                if (neighbours.topRight == null || neighbours.bottomRight == null || neighbours.topRight.x < 0 || neighbours.topRight.x > grid.width || neighbours.topRight.y < 0 ||
-                    neighbours.topRight.y > grid.height || neighbours.bottomRight.x < 0 ||
-                    neighbours.bottomRight.x > grid.width || neighbours.bottomRight.y < 0 ||
-                    neighbours.bottomRight.y > grid.height)
+                if (neighbours.topRight.x < 0 || neighbours.topRight.x > (grid.width - 1) || neighbours.topRight.y < 0 ||
+                    neighbours.topRight.y > (grid.height - 1) || neighbours.bottomRight.x < 0 ||
+                    neighbours.bottomRight.x > (grid.width - 1) || neighbours.bottomRight.y < 0 ||
+                    neighbours.bottomRight.y > (grid.height - 1))
                 {
                     goto case Selection.BOTTOM_LEFT;
                 }
 
-                hexagons[1] = grid.m_allHexagons[(int) neighbours.topRight.x, (int) neighbours.topRight.y];
-                hexagons[2] = grid.m_allHexagons[(int) neighbours.bottomRight.x, (int) neighbours.bottomRight.y];
+                hexagons[2] = grid.m_allHexagons[(int) neighbours.topRight.x, (int) neighbours.topRight.y];
+                hexagons[1] = grid.m_allHexagons[(int) neighbours.bottomRight.x, (int) neighbours.bottomRight.y];
                 break;
             case Selection.BOTTOM_LEFT:
-                if (neighbours.bottomLeft == null || neighbours.bottom == null || neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > grid.width || neighbours.bottomLeft.y < 0 ||
-                    neighbours.bottomLeft.y > grid.height || neighbours.bottom.x < 0 ||
-                    neighbours.bottom.x > grid.width || neighbours.bottom.y < 0 ||
-                    neighbours.bottom.y > grid.height)
+                if (neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > (grid.width - 1) || neighbours.bottomLeft.y < 0 ||
+                    neighbours.bottomLeft.y > (grid.height - 1) || neighbours.bottom.x < 0 ||
+                    neighbours.bottom.x > (grid.width - 1) || neighbours.bottom.y < 0 ||
+                    neighbours.bottom.y > (grid.height - 1))
                 {
                     goto case Selection.BOTTOM_RIGHT;
                 }
@@ -232,10 +241,10 @@ public class GridUtils : MonoBehaviour
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.bottomLeft.x, (int) neighbours.bottomLeft.y];
                 break;
             case Selection.BOTTOM_RIGHT:
-                if (neighbours.bottomRight == null || neighbours.bottom == null || neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > grid.width || neighbours.bottomRight.y < 0 ||
-                    neighbours.bottomRight.y > grid.height || neighbours.bottom.x < 0 ||
-                    neighbours.bottom.x > grid.width || neighbours.bottom.y < 0 ||
-                    neighbours.bottom.y > grid.height)
+                if (neighbours.bottomRight == null || neighbours.bottom == null || neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > (grid.width - 1) || neighbours.bottomRight.y < 0 ||
+                    neighbours.bottomRight.y > (grid.height - 1) || neighbours.bottom.x < 0 ||
+                    neighbours.bottom.x > (grid.width - 1) || neighbours.bottom.y < 0 ||
+                    neighbours.bottom.y > (grid.height - 1))
                 {
                     goto case Selection.TOP_LEFT;
                 }
@@ -257,10 +266,10 @@ public class GridUtils : MonoBehaviour
         NeighbourHexagons neighbours)
     {
         hexagons[0] = hexagon;
-        if (neighbours.top == null || neighbours.topLeft == null || neighbours.top.x < 0 || neighbours.top.x > grid.width || neighbours.top.y < 0 ||
-            neighbours.top.y > grid.height || neighbours.topLeft.x < 0 ||
-            neighbours.topLeft.x > grid.width || neighbours.topLeft.y < 0 ||
-            neighbours.topLeft.y > grid.height || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].hexagon.color != grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].hexagon.color)
+        if (neighbours.top.x < 0 || neighbours.top.x > (grid.width - 1) || neighbours.top.y < 0 ||
+            neighbours.top.y > (grid.height - 1) || neighbours.topLeft.x < 0 ||
+            neighbours.topLeft.x > (grid.width - 1) || neighbours.topLeft.y < 0 ||
+            neighbours.topLeft.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].color != grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].color)
         {
             
         }
@@ -273,10 +282,10 @@ public class GridUtils : MonoBehaviour
                 
                 
            
-        if (neighbours.top == null || neighbours.topRight == null || neighbours.top.x < 0 || neighbours.top.x > grid.width || neighbours.top.y < 0 ||
-            neighbours.top.y > grid.height || neighbours.topRight.x < 0 ||
-            neighbours.topRight.x > grid.width || neighbours.topRight.y < 0 ||
-            neighbours.topRight.y > grid.height || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].hexagon.color != grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].hexagon.color)
+        if (neighbours.top.x < 0 || neighbours.top.x > (grid.width - 1) || neighbours.top.y < 0 ||
+            neighbours.top.y > (grid.height - 1) || neighbours.topRight.x < 0 ||
+            neighbours.topRight.x > (grid.width - 1) || neighbours.topRight.y < 0 ||
+            neighbours.topRight.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y].color != grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].color)
         {
 
         }
@@ -288,10 +297,10 @@ public class GridUtils : MonoBehaviour
         }
 
             
-        if (neighbours.topLeft == null || neighbours.bottomLeft == null || neighbours.topLeft.x < 0 || neighbours.topLeft.x > grid.width || neighbours.topLeft.y < 0 ||
-            neighbours.topLeft.y > grid.height || neighbours.bottomLeft.x < 0 ||
-            neighbours.bottomLeft.x > grid.width || neighbours.bottomLeft.y < 0 ||
-            neighbours.bottomLeft.y > grid.height || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].hexagon.color != grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].hexagon.color)
+        if (neighbours.topLeft.x < 0 || neighbours.topLeft.x > (grid.width - 1) || neighbours.topLeft.y < 0 ||
+            neighbours.topLeft.y > (grid.height - 1) || neighbours.bottomLeft.x < 0 ||
+            neighbours.bottomLeft.x > (grid.width - 1) || neighbours.bottomLeft.y < 0 ||
+            neighbours.bottomLeft.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y].color != grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].color)
         {
             
         }
@@ -303,10 +312,10 @@ public class GridUtils : MonoBehaviour
         }
 
         
-        if (neighbours.topRight == null || neighbours.bottomRight == null || neighbours.topRight.x < 0 || neighbours.topRight.x > grid.width || neighbours.topRight.y < 0 ||
-            neighbours.topRight.y > grid.height || neighbours.bottomRight.x < 0 ||
-            neighbours.bottomRight.x > grid.width || neighbours.bottomRight.y < 0 ||
-            neighbours.bottomRight.y > grid.height || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].hexagon.color != grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].hexagon.color)
+        if (neighbours.topRight.x < 0 || neighbours.topRight.x > (grid.width - 1) || neighbours.topRight.y < 0 ||
+            neighbours.topRight.y > (grid.height - 1) || neighbours.bottomRight.x < 0 ||
+            neighbours.bottomRight.x > (grid.width - 1) || neighbours.bottomRight.y < 0 ||
+            neighbours.bottomRight.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y].color != grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].color)
         {
             
         }
@@ -317,10 +326,10 @@ public class GridUtils : MonoBehaviour
             return hexagons;
         }
         
-        if (neighbours.bottomLeft == null || neighbours.bottom == null || neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > grid.width || neighbours.bottomLeft.y < 0 ||
-            neighbours.bottomLeft.y > grid.height || neighbours.bottom.x < 0 ||
-            neighbours.bottom.x > grid.width || neighbours.bottom.y < 0 ||
-            neighbours.bottom.y > grid.height || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].hexagon.color != grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].hexagon.color)
+        if (neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > (grid.width - 1) || neighbours.bottomLeft.y < 0 ||
+            neighbours.bottomLeft.y > (grid.height - 1) || neighbours.bottom.x < 0 ||
+            neighbours.bottom.x > (grid.width - 1) || neighbours.bottom.y < 0 ||
+            neighbours.bottom.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y].color != grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].color)
         {
             
         }
@@ -331,10 +340,10 @@ public class GridUtils : MonoBehaviour
             return hexagons;
         }
         
-        if (neighbours.bottomRight == null || neighbours.bottom == null || neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > grid.width || neighbours.bottomRight.y < 0 ||
-            neighbours.bottomRight.y > grid.height || neighbours.bottom.x < 0 ||
-            neighbours.bottom.x > grid.width || neighbours.bottom.y < 0 ||
-            neighbours.bottom.y > grid.height || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].hexagon.color != hexagon.hexagon.color || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].hexagon.color != grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].hexagon.color)
+        if (neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > (grid.width - 1) || neighbours.bottomRight.y < 0 ||
+            neighbours.bottomRight.y > (grid.height - 1) || neighbours.bottom.x < 0 ||
+            neighbours.bottom.x > (grid.width - 1) || neighbours.bottom.y < 0 ||
+            neighbours.bottom.y > (grid.height - 1) || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].color != hexagon.color || grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y].color != grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y].color)
         {
             
         }
@@ -370,7 +379,7 @@ public class GridUtils : MonoBehaviour
         {
             
             SwapHexagonGroup(clockwise);
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSeconds(0.3f);
 
             // Check every group member for possible matches
             // For now we only check for first grid - we will change this function later
@@ -379,96 +388,108 @@ public class GridUtils : MonoBehaviour
                 GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[2],
                 GridManager.instance.gridList[0]))
             {
-                // Other hexagons should fall now
-                MakeHexagonsFall(tempGroup);
+                UIManager.instance.IncreaseMoves();
+                DecreaseBombTimers(GridManager.instance.bombList);
+               MakeHexagonsFall();
                 break;
                    
             }
         }
 
+        FillAfterExplosion();
         alreadyRotating = false;
 
     }
 
-    // ONLY works for 1 grid in this version
-    public void MakeHexagonsFall(HexagonHolder[] explosionGroup)
+    public void DecreaseBombTimers(List<HexagonHolder> bombList)
     {
-        // Get selected group x and y values
-        int x1, y1, x2, y2, x3, y3;
-        x1 = explosionGroup[0].xIndex;
-        y1 = explosionGroup[0].yIndex;
-        x2 = explosionGroup[1].xIndex;
-        y2 = explosionGroup[1].yIndex;
-        x3 = explosionGroup[2].xIndex;
-        y3 = explosionGroup[2].yIndex;
-
-
-        for (int i = y1 -1; i >= 0; i--)
+        for (int i = 0; i < bombList.Count; i++)
         {
-            if (GridManager.instance.gridList[0].m_allHexagons[x1, i] == null)
+            bombList[i].DecreaseBombTimer();
+        }
+    }
+
+    // Right now only works for 1 grid
+    public void MakeHexagonsFall()
+    {
+        int fallcount = 0;
+        int fallStartX;
+        int fallStartY;
+        bool firstEncounter = true;
+        // Check every column and get fall count
+        for (int i = 0; i < GridManager.instance.gridList[0].width; i++)
+        {
+            firstEncounter = true;
+            fallcount = 0;
+            fallStartX = 0;
+            fallStartY = 0;
+            for (int j = 0; j < GridManager.instance.gridList[0].height; j++)
             {
-                continue;
-            }
-            else
-            {
-                if (i < GridManager.instance.gridList[0].height)
+                if (GridManager.instance.gridList[0].m_allHexagons[i, j] == null)
                 {
-                    while (GridManager.instance.gridList[0].m_allHexagons[x1, i + 1] == null)
+                    if (firstEncounter)
                     {
-                        FallSingleHexagon(x1, i, x1, y1);
-                        i++;
-                        y1++;
+                        fallStartX = i;
+                        fallStartY = j - 1;
+                        firstEncounter = false;
                     }
-                    y1 -= 2;
+                    fallcount++;
+                }
+            }
+
+            // Now start falling
+            if (fallcount > 0)
+            {
+                for (int z = fallStartY; z >= 0; z--)
+                {
+                    FallSingleHexagon(i, z, i, z + fallcount);
+                }
+            }
+        }
+    }
+
+    // We can find a better approach for this
+    public void FillAfterExplosion()
+    {
+        List<HexagonHolder> tempList = new List<HexagonHolder>();
+
+        
+
+        int shouldSpawncount = 0;
+        // Check every column and get fall count
+        for (int i = 0; i < GridManager.instance.gridList[0].width; i++)
+        {
+            shouldSpawncount = 0;
+            for (int j = 0; j < GridManager.instance.gridList[0].height; j++)
+            {
+                if (GridManager.instance.gridList[0].m_allHexagons[i, j] == null)
+                {
+                    shouldSpawncount++;
+                }
+            }
+
+            // Now start instantiating
+            if (shouldSpawncount > 0)
+            {
+                for (int z = shouldSpawncount; z > 0; z--)
+                {
+                    HexagonHolder spawnedHexagon = Instantiate(GetRandomPiece(), new Vector3(i, 10f, 0), Quaternion.identity).GetComponent<HexagonHolder>();
+                    spawnedHexagon.Fall(i, z - 1);
+                    spawnedHexagon.SetCoord(i, z - 1);
+                    GridManager.instance.gridList[0].m_allHexagons[i, z - 1] = spawnedHexagon;
+                    tempList.Add(spawnedHexagon);
                 }
             }
         }
 
-        for (int i = y2 - 1; i >= 0; i--)
+        if (bombScore - UIManager.instance.score <= 0)
         {
-            if (GridManager.instance.gridList[0].m_allHexagons[x2, i] == null)
-            {
-                continue;
-            }
-            else
-            {
-                if (i < GridManager.instance.gridList[0].height)
-                {
-                    while (GridManager.instance.gridList[0].m_allHexagons[x2, i + 1] == null)
-                    {
-                        FallSingleHexagon(x2, i, x2, y2);
-                        i++;
-                        y2++;
-                    }
-                    y2 -= 2;
-                }
-                
-            }
+            //Create a bomb
+            int bombIndex = Random.Range(0, tempList.Count);
+            tempList[bombIndex].isBomb = true;
+            GridManager.instance.bombList.Add(tempList[bombIndex]);
+            bombScore += 1000;
         }
-
-        for (int i = y3 - 1; i >= 0; i--)
-        {
-            if (GridManager.instance.gridList[0].m_allHexagons[x3, i] == null)
-            {
-                continue;
-            }
-            else
-            {
-                if (i < GridManager.instance.gridList[0].height)
-                {
-                    while (GridManager.instance.gridList[0].m_allHexagons[x3, i + 1] == null)
-                    {
-                        FallSingleHexagon(x3, i, x3, y3);
-                        i++;
-                        y3++;
-                    }
-                    y3 -= 2;
-                }
-            }
-        }
-
-       
-
     }
 
     public bool CheckMatch(HexagonHolder hexagon, Grid grid)
@@ -481,6 +502,7 @@ public class GridUtils : MonoBehaviour
         // if there is a match
         if (explosionList[1] != null && explosionList[2] != null)
         {
+            UIManager.instance.IncreaseScore();
             return ExplodeGroup(explosionList, grid);
         }
         else

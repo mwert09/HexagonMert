@@ -9,6 +9,10 @@ public class GridManager : MonoBehaviour
     public List<Grid> gridList;
     public GameObject[] hexagonPrefabs;
 
+    public List<Color> colorList;
+
+    public List<HexagonHolder> bombList;
+
     private void Awake()
     {
         instance = this;

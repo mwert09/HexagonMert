@@ -32,53 +32,55 @@ public class UserInputManager : MonoBehaviour
         swipeClockwise = false;
         swipeCounterClockwise = false;
 
-
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        if (!GameFlowManager.instance.paused)
         {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider != null)
+            if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
-                GameObject ourHitHexagon = hit.collider.transform.gameObject;
-                GridUtils.instance.SetClickedCell(ourHitHexagon, ourHitHexagon.GetComponentInParent<Grid>(), GetMouseWorldPosition());
-            }
-        }
-
-        if (Input.touches.Length > 0)
-        {
-            Touch t = Input.GetTouch(0);
-            if (t.phase == TouchPhase.Began)
-            {
-                startPos = new Vector2(t.position.x / (float)Screen.width, t.position.y / (float)Screen.width);
-                startTime = Time.time;
-            }
-
-            if (t.phase == TouchPhase.Ended)
-            {
-                // Pressed too long
-                if (Time.time - startTime > maxSwipeTime)
-                    return;
-                Vector2 endPos = new Vector2(t.position.x / (float)Screen.width, t.position.y / (float)Screen.width);
-
-                Vector2 swipe = new Vector2(endPos.x - startPos.x, endPos.y - startPos.y);
-                
-                // Too short
-                if (swipe.magnitude < minSwipeDistance)
-                    return;
-
-                //TODO: FIX
-                if (Mathf.Abs(swipe.x) > Mathf.Abs(swipe.y))
+                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+                if (hit.collider != null)
                 {
-                    if (swipe.x > 0)
+                    GameObject ourHitHexagon = hit.collider.transform.gameObject;
+                    GridUtils.instance.SetClickedCell(ourHitHexagon, ourHitHexagon.GetComponentInParent<Grid>(), GetMouseWorldPosition());
+                }
+            }
+
+            if (Input.touches.Length > 0)
+            {
+                Touch t = Input.GetTouch(0);
+                if (t.phase == TouchPhase.Began)
+                {
+                    startPos = new Vector2(t.position.x / (float)Screen.width, t.position.y / (float)Screen.width);
+                    startTime = Time.time;
+                }
+
+                if (t.phase == TouchPhase.Ended)
+                {
+                    // Pressed too long
+                    if (Time.time - startTime > maxSwipeTime)
+                        return;
+                    Vector2 endPos = new Vector2(t.position.x / (float)Screen.width, t.position.y / (float)Screen.width);
+
+                    Vector2 swipe = new Vector2(endPos.x - startPos.x, endPos.y - startPos.y);
+
+                    // Too short
+                    if (swipe.magnitude < minSwipeDistance)
+                        return;
+
+                    //TODO: FIX
+                    if (Mathf.Abs(swipe.x) > Mathf.Abs(swipe.y))
                     {
-                        /*swipeCounterClockwise = false;
-                        swipeClockwise = true*/
-                        GridUtils.instance.Rotate(true);
-                    }
-                    else
-                    {
-                        /*swipeClockwise = false;
-                        swipeCounterClockwise = true;*/
-                        GridUtils.instance.Rotate(false);
+                        if (swipe.x > 0)
+                        {
+                            /*swipeCounterClockwise = false;
+                            swipeClockwise = true*/
+                            GridUtils.instance.Rotate(true);
+                        }
+                        else
+                        {
+                            /*swipeClockwise = false;
+                            swipeCounterClockwise = true;*/
+                            GridUtils.instance.Rotate(false);
+                        }
                     }
                 }
             }

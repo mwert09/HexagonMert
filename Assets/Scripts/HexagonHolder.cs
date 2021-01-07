@@ -1,10 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class HexagonHolder : MonoBehaviour
 {
-    public HexagonPieceSO hexagon;
+    /*
+     *
+     *
+     * I was going to make this with Scriptable objects but i changed my mind
+     * But i didn't delete everything so i can go back to it if i want to
+     *
+     *
+     */
+    //public HexagonPieceSO hexagon;
+    public Color color;
     public int xIndex;
     public int yIndex;
     public int rotationSpeed;
@@ -18,15 +28,30 @@ public class HexagonHolder : MonoBehaviour
     private float fallXCoord;
     private float fallYCoord;
 
+    [Header("Bomb Part")]
+    public bool isBomb;
+    public Sprite bombSprite;
+    public int movesBeforeExplosion;
+    public GameObject bombText;
+
+
     private void Awake()
     {
-        GetComponent<SpriteRenderer>().color = hexagon.color.color;
+        GetComponent<SpriteRenderer>().color = color;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (isBomb)
+        {
+            GetComponent<SpriteRenderer>().sprite = bombSprite;
+            bombText.SetActive(true);
+        }
+        else
+        {
+            bombText.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -34,10 +59,6 @@ public class HexagonHolder : MonoBehaviour
     {
         if (animate)
         {
-            /*float newPositionX = Mathf.Lerp(transform.position.x, newPos.x, Time.deltaTime * 1f);
-            float newPositionY = Mathf.Lerp(transform.position.y, newPos.y, Time.deltaTime * 1f);
-            transform.position = new Vector2(newPositionX, newPositionY);*/
-
             // Get the middle point to rotate around
 
             if (clockwise)
@@ -67,6 +88,7 @@ public class HexagonHolder : MonoBehaviour
                 is_falling = false;
             }
         }
+
     }
 
     public void SetCoord(int x, int y)
@@ -90,5 +112,14 @@ public class HexagonHolder : MonoBehaviour
         is_falling = true;
     }
 
+    public void DecreaseBombTimer()
+    {
+        movesBeforeExplosion--;
+        bombText.GetComponent<TextMesh>().text = movesBeforeExplosion.ToString();
+        if (movesBeforeExplosion == 0)
+        {
+            GameFlowManager.instance.SetGameEnd();
+        }
+    }
     
 }
