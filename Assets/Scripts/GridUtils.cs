@@ -878,7 +878,8 @@ public class GridUtils : MonoBehaviour
     // Finds the same color count for every pair
     public bool CheckNeighbouringGroupForColor(HexagonPair pair)
     {
-        int samecolorCount = 0;
+        int firstNeighboursamecolorCount = 0;
+        int secondNeighboursameColorCount = 0;
         Grid currentGrid = GridManager.instance.gridList[0];
         NeighbourHexagons pairNeighbourHexagons = new NeighbourHexagons();
         NeighbourHexagons secondNeighbourHexagons = new NeighbourHexagons();
@@ -925,7 +926,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.top.x, (int)pairNeighbourHexagons.top.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -941,7 +942,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.top.x, (int)secondNeighbourHexagons.top.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
@@ -955,7 +956,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topLeft.x, (int)pairNeighbourHexagons.topLeft.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -970,7 +971,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topLeft.x, (int)secondNeighbourHexagons.topLeft.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
@@ -985,7 +986,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomLeft.x, (int)pairNeighbourHexagons.bottomLeft.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -1000,7 +1001,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomLeft.x, (int)secondNeighbourHexagons.bottomLeft.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
@@ -1016,7 +1017,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottom.x, (int)pairNeighbourHexagons.bottom.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -1032,7 +1033,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottom.x, (int)secondNeighbourHexagons.bottom.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
@@ -1047,7 +1048,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topRight.x, (int)pairNeighbourHexagons.topRight.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -1063,7 +1064,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topRight.x, (int)secondNeighbourHexagons.topRight.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
@@ -1078,7 +1079,7 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomRight.x, (int)pairNeighbourHexagons.bottomRight.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                firstNeighboursamecolorCount++;
             }
         }
 
@@ -1094,11 +1095,11 @@ public class GridUtils : MonoBehaviour
             if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomRight.x, (int)secondNeighbourHexagons.bottomRight.y].color ==
                 pair.first.color)
             {
-                samecolorCount++;
+                secondNeighboursameColorCount++;
             }
         }
 
-        if (samecolorCount > 4)
+        if (firstNeighboursamecolorCount > 2 || secondNeighboursameColorCount > 2)
         {
             return true;
         }
