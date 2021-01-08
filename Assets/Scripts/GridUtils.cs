@@ -499,10 +499,21 @@ public class GridUtils : MonoBehaviour
         if (!alreadyRotating)
         {
             alreadyRotating = true; 
-            StartCoroutine(RotationRoutine(clockwise, SetAlreadyRotation));
-            
+            StartCoroutine(RotationRoutine(clockwise, SetAlreadyRotation, StartCheckingMoves));
+            // Check if there are any possible moves. If not then end the game.
         }
     }
+
+    public void StartCheckingMoves()
+    {
+        if (!CheckPossibleMoves())
+        {
+            Debug.Log("Game End");
+            GameFlowManager.instance.SetGameEnd("No possible match available!");
+        }
+    }
+     
+     
 
     /*
      * Rotates the selected hexagon group 3 times
@@ -511,7 +522,7 @@ public class GridUtils : MonoBehaviour
      *  After explosion this routine also calls hexagonfall and fillafterexplosion function
      *
      */
-    private IEnumerator RotationRoutine(bool clockwise, Action SetAlreadyRotating)
+    private IEnumerator RotationRoutine(bool clockwise, Action SetAlreadyRotating, Action CheckAvailableMoves)
     {
         HexagonHolder[] tempGroup = new HexagonHolder[3];
         if (GridManager.instance.gridList[0].m_selectedHexagonGroup[0] != null &&
@@ -550,6 +561,7 @@ public class GridUtils : MonoBehaviour
         }
 
         SetAlreadyRotating();
+        CheckAvailableMoves();
     }
 
     
@@ -651,14 +663,6 @@ public class GridUtils : MonoBehaviour
         // Also checks if spawned hexagons have matches
         // if there is a match explode
         ExplodeStartingMatches(true);
-
-        // Check if there are any possible moves. If not then end the game.
-        if (!CheckPossibleMoves())
-        {
-            Debug.Log("Game End");
-            GameFlowManager.instance.SetGameEnd("No possible match available!");
-        }
-
     }
 
     // Fills the explosion list. if explosion list is not null then it starts exploding
@@ -824,9 +828,9 @@ public class GridUtils : MonoBehaviour
     {
         List<List<HexagonPair>> pairList = new List<List<HexagonPair>>();
         // Check every hexagon for possible locations and matches
-        for (int i = 0; i < GridManager.instance.gridList[0].width - 1; i++)
+        for (int i = 0; i < GridManager.instance.gridList[0].height; i++)
         {
-            for (int j = 0; j < GridManager.instance.gridList[0].height - 1; j++)
+            for (int j = 0; j < GridManager.instance.gridList[0].width; j++)
             {
                 HexagonHolder currentHexagon = GridManager.instance.gridList[0].m_allHexagons[j, i];
                 // To get every possible location we need to get neighbours
@@ -839,21 +843,8 @@ public class GridUtils : MonoBehaviour
                 
             }
         }
-
         int possibleMatches = 0;
-        /*foreach (List<HexagonPair> pair in pairList)
-        {
-            foreach (HexagonPair hexpair in pair)
-            {
-                
-                if (CheckNeighbouringGroupForColor(hexpair))
-                {
-                    possibleMatches++;
-                }
-            }
-            
-        }*/
-
+       
         for (int i = 0; i < pairList.Count; i++)
         {
             List<HexagonPair> hexpair = pairList[i];
@@ -866,241 +857,8 @@ public class GridUtils : MonoBehaviour
                 }
             }
         }
-
+        Debug.Log(possibleMatches);
         if (possibleMatches > 0)
-        {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    // Finds the same color count for every pair
-    public bool CheckNeighbouringGroupForColor(HexagonPair pair)
-    {
-        int firstNeighboursamecolorCount = 0;
-        int secondNeighboursameColorCount = 0;
-        Grid currentGrid = GridManager.instance.gridList[0];
-        NeighbourHexagons pairNeighbourHexagons = new NeighbourHexagons();
-        NeighbourHexagons secondNeighbourHexagons = new NeighbourHexagons();
-
-        // Top Bottom
-        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex && pair.first.yIndex == pair.second.yIndex - 1)
-        {
-            pairNeighbourHexagons =
-                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex - 1, (pair.first.yIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
-            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex + 1,
-                (pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
-        }
-
-        // Top right Bottom left
-        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex - 1 == pair.second.xIndex && pair.first.yIndex ==
-            ((pair.first.xIndex % 2 == 0) ? pair.second.yIndex : pair.second.yIndex + 1))
-        {
-            pairNeighbourHexagons =
-                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
-            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
-                pair.first.yIndex + 1]);
-        }
-
-        // Top left Bottom right
-
-        if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex > 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex - 1 && pair.first.yIndex == 
-            ((pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1))
-        {
-            pairNeighbourHexagons =
-                GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
-            secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
-                pair.first.yIndex + 1]);
-        }
-       
-
-        if (pairNeighbourHexagons.top.x < 0 || pairNeighbourHexagons.top.x > (currentGrid.width - 1) || pairNeighbourHexagons.top.y < 0 ||
-            pairNeighbourHexagons.top.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            // CHECK COLORS
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.top.x, (int)pairNeighbourHexagons.top.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        // second neighbours
-        if (secondNeighbourHexagons.top.x < 0 || secondNeighbourHexagons.top.x > (currentGrid.width - 1) || secondNeighbourHexagons.top.y < 0 ||
-            secondNeighbourHexagons.top.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.top.x, (int)secondNeighbourHexagons.top.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-        if (pairNeighbourHexagons.topLeft.x < 0 || pairNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.topLeft.y < 0 ||
-            pairNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topLeft.x, (int)pairNeighbourHexagons.topLeft.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        // second
-        if (pairNeighbourHexagons.topLeft.x < 0 || pairNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.topLeft.y < 0 ||
-            pairNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topLeft.x, (int)secondNeighbourHexagons.topLeft.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-
-        if (pairNeighbourHexagons.bottomLeft.x < 0 || pairNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomLeft.y < 0 ||
-            pairNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomLeft.x, (int)pairNeighbourHexagons.bottomLeft.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        // second
-        if (secondNeighbourHexagons.bottomLeft.x < 0 || secondNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomLeft.y < 0 ||
-            secondNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomLeft.x, (int)secondNeighbourHexagons.bottomLeft.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-
-        if (pairNeighbourHexagons.bottom.x < 0 ||
-            pairNeighbourHexagons.bottom.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottom.y < 0 ||
-            pairNeighbourHexagons.bottom.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottom.x, (int)pairNeighbourHexagons.bottom.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        //second 
-        if (secondNeighbourHexagons.bottom.x < 0 ||
-            secondNeighbourHexagons.bottom.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottom.y < 0 ||
-            secondNeighbourHexagons.bottom.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottom.x, (int)secondNeighbourHexagons.bottom.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-        if (pairNeighbourHexagons.topRight.x < 0 || pairNeighbourHexagons.topRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.topRight.y < 0 ||
-            pairNeighbourHexagons.topRight.y > (currentGrid.height - 1))
-        {
-
-        }
-
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topRight.x, (int)pairNeighbourHexagons.topRight.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        // second
-        if (secondNeighbourHexagons.topRight.x < 0 || secondNeighbourHexagons.topRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.topRight.y < 0 ||
-            secondNeighbourHexagons.topRight.y > (currentGrid.height - 1))
-        {
-
-        }
-
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topRight.x, (int)secondNeighbourHexagons.topRight.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-        if (pairNeighbourHexagons.bottomRight.x < 0 ||
-            pairNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomRight.y < 0 ||
-            pairNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomRight.x, (int)pairNeighbourHexagons.bottomRight.y].color ==
-                pair.first.color)
-            {
-                firstNeighboursamecolorCount++;
-            }
-        }
-
-        //second 
-        if (secondNeighbourHexagons.bottomRight.x < 0 ||
-            secondNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomRight.y < 0 ||
-            secondNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
-        {
-
-        }
-        else
-        {
-            if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomRight.x, (int)secondNeighbourHexagons.bottomRight.y].color ==
-                pair.first.color)
-            {
-                secondNeighboursameColorCount++;
-            }
-        }
-
-        if (firstNeighboursamecolorCount > 2 || secondNeighboursameColorCount > 2)
         {
             return true;
         }
@@ -1108,7 +866,268 @@ public class GridUtils : MonoBehaviour
         {
             return false;
         }
+
         
+
+    }
+
+    // Finds the same color count for every pair
+    public bool CheckNeighbouringGroupForColor(HexagonPair pair)
+    {
+        try
+        {
+            int firstNeighboursamecolorCount = 0;
+            int secondNeighboursameColorCount = 0;
+            Grid currentGrid = GridManager.instance.gridList[0];
+            NeighbourHexagons pairNeighbourHexagons = new NeighbourHexagons();
+            NeighbourHexagons secondNeighbourHexagons = new NeighbourHexagons();
+
+            // Top Bottom
+            if (pair.first.xIndex >= 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex >= 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex && pair.first.yIndex == pair.second.yIndex - 1)
+            {
+                if (pair.first.xIndex > 0)
+                {
+                    pairNeighbourHexagons =
+                        GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex - 1, (pair.first.yIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
+                }
+
+                if (pair.first.xIndex < GridManager.instance.gridList[0].width - 1)
+                {
+                    secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex + 1,
+                        (pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1]);
+                }
+            }
+
+            // Top right Bottom left
+            if (pair.first.xIndex > 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex >= 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex - 1 == pair.second.xIndex && pair.first.yIndex ==
+                ((pair.first.xIndex % 2 == 0) ? pair.second.yIndex : pair.second.yIndex + 1))
+            {
+                if (pair.second.yIndex > 0)
+                {
+                    pairNeighbourHexagons =
+                        GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
+                }
+
+                secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
+                    pair.first.yIndex + 1]);
+            }
+
+            // Top left Bottom right
+
+            if (pair.first.xIndex >= 0 && pair.first.xIndex < currentGrid.width - 1 && pair.first.yIndex >= 0 && pair.first.yIndex < currentGrid.height - 1 && pair.first.xIndex == pair.second.xIndex - 1 && pair.first.yIndex ==
+                ((pair.first.xIndex % 2 == 0) ? pair.first.yIndex : pair.first.yIndex + 1))
+            {
+                if (pair.second.yIndex > 0)
+                {
+                    pairNeighbourHexagons =
+                        GetNeighbourHexagons(currentGrid.m_allHexagons[pair.second.xIndex, pair.second.yIndex - 1]);
+                }
+
+                secondNeighbourHexagons = GetNeighbourHexagons(currentGrid.m_allHexagons[pair.first.xIndex,
+                    pair.first.yIndex + 1]);
+            }
+
+
+            if (pairNeighbourHexagons.top.x < 0 || pairNeighbourHexagons.top.x > (currentGrid.width - 1) || pairNeighbourHexagons.top.y < 0 ||
+                pairNeighbourHexagons.top.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                // CHECK COLORS
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.top.x, (int)pairNeighbourHexagons.top.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            // second neighbours
+            if (secondNeighbourHexagons.top.x < 0 || secondNeighbourHexagons.top.x > (currentGrid.width - 1) || secondNeighbourHexagons.top.y < 0 ||
+                secondNeighbourHexagons.top.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.top.x, (int)secondNeighbourHexagons.top.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+            if (pairNeighbourHexagons.topLeft.x < 0 || pairNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.topLeft.y < 0 ||
+                pairNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topLeft.x, (int)pairNeighbourHexagons.topLeft.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            // second
+            if (secondNeighbourHexagons.topLeft.x < 0 || secondNeighbourHexagons.topLeft.x > (currentGrid.width - 1) || secondNeighbourHexagons.topLeft.y < 0 ||
+                secondNeighbourHexagons.topLeft.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topLeft.x, (int)secondNeighbourHexagons.topLeft.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+
+            if (pairNeighbourHexagons.bottomLeft.x < 0 || pairNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomLeft.y < 0 ||
+                pairNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomLeft.x, (int)pairNeighbourHexagons.bottomLeft.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            // second
+            if (secondNeighbourHexagons.bottomLeft.x < 0 || secondNeighbourHexagons.bottomLeft.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomLeft.y < 0 ||
+                secondNeighbourHexagons.bottomLeft.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomLeft.x, (int)secondNeighbourHexagons.bottomLeft.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+
+            if (pairNeighbourHexagons.bottom.x < 0 ||
+                pairNeighbourHexagons.bottom.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottom.y < 0 ||
+                pairNeighbourHexagons.bottom.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottom.x, (int)pairNeighbourHexagons.bottom.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            //second 
+            if (secondNeighbourHexagons.bottom.x < 0 ||
+                secondNeighbourHexagons.bottom.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottom.y < 0 ||
+                secondNeighbourHexagons.bottom.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottom.x, (int)secondNeighbourHexagons.bottom.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+            if (pairNeighbourHexagons.topRight.x < 0 || pairNeighbourHexagons.topRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.topRight.y < 0 ||
+                pairNeighbourHexagons.topRight.y > (currentGrid.height - 1))
+            {
+
+            }
+
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.topRight.x, (int)pairNeighbourHexagons.topRight.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            // second
+            if (secondNeighbourHexagons.topRight.x < 0 || secondNeighbourHexagons.topRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.topRight.y < 0 ||
+                secondNeighbourHexagons.topRight.y > (currentGrid.height - 1))
+            {
+
+            }
+
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.topRight.x, (int)secondNeighbourHexagons.topRight.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+            if (pairNeighbourHexagons.bottomRight.x < 0 ||
+                pairNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || pairNeighbourHexagons.bottomRight.y < 0 ||
+                pairNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)pairNeighbourHexagons.bottomRight.x, (int)pairNeighbourHexagons.bottomRight.y].color ==
+                    pair.first.color)
+                {
+                    firstNeighboursamecolorCount++;
+                }
+            }
+
+            //second 
+            if (secondNeighbourHexagons.bottomRight.x < 0 ||
+                secondNeighbourHexagons.bottomRight.x > (currentGrid.width - 1) || secondNeighbourHexagons.bottomRight.y < 0 ||
+                secondNeighbourHexagons.bottomRight.y > (currentGrid.height - 1))
+            {
+
+            }
+            else
+            {
+                if (currentGrid.m_allHexagons[(int)secondNeighbourHexagons.bottomRight.x, (int)secondNeighbourHexagons.bottomRight.y].color ==
+                    pair.first.color)
+                {
+                    secondNeighboursameColorCount++;
+                }
+            }
+
+            if (firstNeighboursamecolorCount > 2 || secondNeighboursameColorCount > 2)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        catch (NullReferenceException ex)
+        {
+
+        }
+
+        return true;
     }
 
     // Only works for the first grid right now
@@ -1121,7 +1140,7 @@ public class GridUtils : MonoBehaviour
 
         // BOTTOM
         if (neighbours.bottom.x < 0 || neighbours.bottom.x > (currentGrid.width - 1) || neighbours.bottom.y < 0 ||
-            neighbours.bottom.y > (currentGrid.height - 2))
+            neighbours.bottom.y > (currentGrid.height - 1))
         {
 
         }
@@ -1171,7 +1190,6 @@ public class GridUtils : MonoBehaviour
                 allPairs.Add(foundHexagonPair);
             }
         }
-
         return allPairs;
     }
 

@@ -15,7 +15,8 @@ public class HexagonHolder : MonoBehaviour
      *
      */
     //public HexagonPieceSO hexagon;
-    [Header("Hexagon")]
+    [Header("Hexagon")] 
+    public Sprite defaultSprite;
     public int xIndex;
     public int yIndex;
     public Color color;
@@ -154,6 +155,11 @@ public class HexagonHolder : MonoBehaviour
     public void SetBombSprite()
     {
         GetComponent<SpriteRenderer>().sprite = bombSprite;
+    }
+
+    public void SetDefaultSprite()
+    {
+        GetComponent<SpriteRenderer>().sprite = defaultSprite;
     }
     
 }

@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44cc8a30d951e604ab132568e8aa8207, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultSprite: {fileID: 21300000, guid: 30899666e36d1644ca131367f7a74c81, type: 3}
   xIndex: 0
   yIndex: 0
   color: {r: 0.6603774, g: 0.109024554, b: 0.52744263, a: 1}

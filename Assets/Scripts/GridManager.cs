@@ -16,6 +16,15 @@ public class GridManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        /*for (int i = 0; i < colorList.Count; i++)
+        {
+            Color newColor = new Color(
+                Random.Range(0f, 1f),
+                Random.Range(0f, 1f),
+                Random.Range(0f, 1f)
+            );
+            colorList[i] = newColor;
+        }*/
     }
 
     // Start is called before the first frame update
@@ -24,6 +33,11 @@ public class GridManager : MonoBehaviour
         InitGrids();
         FillGridsWithRandom();
        GridUtils.instance.ExplodeStartingMatches(false);
+       if (!GridUtils.instance.CheckPossibleMoves())
+       {
+           Debug.Log("Restarting");
+            LevelManager.instance.LoadLevel(1);
+       }
     }
 
 
