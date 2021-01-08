@@ -526,6 +526,7 @@ public class GridUtils : MonoBehaviour
             {
 
                 SwapHexagonGroup(clockwise);
+                SoundManager.instance.TriggerRotateSound();
                 yield return new WaitForSeconds(0.3f);
 
                 // Check every group member for possible matches
@@ -692,6 +693,8 @@ public class GridUtils : MonoBehaviour
                 GridManager.instance.bombList.Remove(explosionList[i]);
             }
             ParticleManager.instance.ShowParticle(new Vector2(explosionList[i].transform.position.x, explosionList[i].transform.position.y), explosionList[i].color);
+            SoundManager.instance.TriggerExplosionSound();
+            //StartCoroutine(CameraController.instance.CameraShake(0.15f, .4f));
             grid.m_allHexagons[explosionList[i].xIndex, explosionList[i].yIndex] = null;
             Destroy(explosionList[i].gameObject);
         }

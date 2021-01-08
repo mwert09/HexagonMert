@@ -2,14 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /* Basic camera controller - It basically changes x,y positions of our main camera and sets orthographic size to make grid fit on screen */
 public class CameraController : MonoBehaviour
 {
+    public static CameraController instance;
     // padding
     public float borderSize;
 
     private Camera mainCamera;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -47,4 +54,22 @@ public class CameraController : MonoBehaviour
         }
         
     }
+
+    /*public IEnumerator CameraShake(float duration, float magnitude)
+    {
+        Vector3 originalPos = transform.position;
+
+        float elapsed = 0.0f;
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+
+            transform.position = new Vector3(x, y, transform.position.z);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = originalPos;
+    }*/
 }
