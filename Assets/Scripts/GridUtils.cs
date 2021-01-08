@@ -644,6 +644,7 @@ public class GridUtils : MonoBehaviour
             //Create a bomb
             int bombIndex = Random.Range(0, tempList.Count - 1);
             tempList[bombIndex].isBomb = true;
+            tempList[bombIndex].SetBombSprite();
             GridManager.instance.bombList.Add(tempList[bombIndex]);
             bombScore += 1000;
         }

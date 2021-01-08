@@ -150,5 +150,10 @@ public class HexagonHolder : MonoBehaviour
         gameObject.GetComponent<SpriteRenderer>().material = DefaultMaterial;
         
     }
+
+    public void SetBombSprite()
+    {
+        GetComponent<SpriteRenderer>().sprite = bombSprite;
+    }
     
 }
