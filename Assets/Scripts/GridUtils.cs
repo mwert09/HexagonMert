@@ -840,7 +840,7 @@ public class GridUtils : MonoBehaviour
         }
 
         int possibleMatches = 0;
-        foreach (List<HexagonPair> pair in pairList)
+        /*foreach (List<HexagonPair> pair in pairList)
         {
             foreach (HexagonPair hexpair in pair)
             {
@@ -851,6 +851,19 @@ public class GridUtils : MonoBehaviour
                 }
             }
             
+        }*/
+
+        for (int i = 0; i < pairList.Count; i++)
+        {
+            List<HexagonPair> hexpair = pairList[i];
+            for (int j = 0; j < hexpair.Count; j++)
+            {
+                HexagonPair currentHexpair = hexpair[j];
+                if (CheckNeighbouringGroupForColor(currentHexpair))
+                {
+                    possibleMatches++;
+                }
+            }
         }
 
         if (possibleMatches > 0)
@@ -1164,7 +1177,7 @@ public class GridUtils : MonoBehaviour
     public void ExplodeStartingMatches(bool shouldAddScore)
     {
         Grid currentGrid = GridManager.instance.gridList[0];
-        for (int i = 0; i < currentGrid.width - 1; i++)
+        for (int i = 0; i < currentGrid.width; i++)
         {
             for (int j = 0; j < currentGrid.height - 1; j++)
             {
