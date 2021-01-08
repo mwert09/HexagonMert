@@ -6,8 +6,8 @@ public class GameFlowManager : MonoBehaviour
 {
     public static GameFlowManager instance;
 
-    public bool gameEnd = false;
-    public bool paused = false;
+    [SerializeField] private bool gameEnd = false;
+    [SerializeField] private bool paused = false;
 
     private void Awake()
     {
@@ -26,6 +26,7 @@ public class GameFlowManager : MonoBehaviour
         
     }
 
+    /* Pauses everything and shows the end game panel */
     public void SetGameEnd(string reason)
     {
         gameEnd = true;
@@ -34,4 +35,15 @@ public class GameFlowManager : MonoBehaviour
         UIManager.instance.gameOverText.text = reason;
         UIManager.instance.ShowGameOverPanel();
     }
+
+    public void SetPaused(bool value)
+    {
+        paused = value;
+    }
+
+    public bool isPaused()
+    {
+        return paused;
+    }
+
 }

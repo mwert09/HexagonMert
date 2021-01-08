@@ -3,20 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ *  In the future we might create multiple grids like in candy crush but we need to change GridUtil class functions.
+ *
+ */
 public class Grid : MonoBehaviour
 {
+
+    // We need to have start positions for each grid so we can properly instantiate
     public float startPosX;
     public float startPosY;
 
     // Grid width and height to initialize default(8x9)
     public int width, height;
-    // Basic Prefab to test out grid
+
+    // Basic Prefab for cell. We will use those to detect ray hits
     public GameObject cellPrefab;
 
     // Cell array in this grid
     public Cell[,] m_allCells;
-    // Hexagon holder array to hold hexagons
+
+    // Hexagon holder array to hold hexagons. Hexagons are basically game pieces we need for core gameplay
     public HexagonHolder[,] m_allHexagons;
+
     // We have to change our x and y values based on an offset to create our grid
     public float xOffset = 0.759f;
     public float yOffset = -0.44f;
@@ -35,19 +44,7 @@ public class Grid : MonoBehaviour
         m_selectedHexagonGroup[2] = null;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    /* Grid initialization function. Instantiates cell gameobjects and displays it
+    /* Grid initialization function. Instantiates cell gameobjects and displays them
      */
     public void InitGrid(float startPosX, float startPosY)
     {
@@ -55,6 +52,7 @@ public class Grid : MonoBehaviour
         {
             for (int j = 0; j < width; j++)
             {
+                // find new cell coordinates to instantiate
                 float yPos = i * yOffset * 2 + startPosY;
                 
                 //if it is odd
@@ -67,6 +65,7 @@ public class Grid : MonoBehaviour
                 cell.name = "Cell " + i + ", " + j;
                 m_allCells[j, i] = cell.GetComponent<Cell>();
                 cell.transform.parent = transform;
+                // fill all cells array and initialize cell (set x, y coordinates and grid)
                 try
                 {
                     m_allCells[j, i].Init(i, j, this);
@@ -79,11 +78,13 @@ public class Grid : MonoBehaviour
         }
     }
 
+    // Returns the whole space occupied on the x axis by this grid
     public float GetWidth()
     {
         return xOffset * width;
     }
 
+    // Returns the whole space occupied on the y axis by this grid
     public float GetHeight()
     {
         return -yOffset * height;

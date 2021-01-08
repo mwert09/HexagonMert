@@ -23,6 +23,7 @@ public class LevelManager : MonoBehaviour
         
     }
 
+    // Loads a level
     public void LoadLevel(int LevelIndex)
     {
         SceneManager.LoadScene(LevelIndex);

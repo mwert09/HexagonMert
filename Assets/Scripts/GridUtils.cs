@@ -8,14 +8,15 @@ using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/* This class has bunch of functions for gameplay mechanics */
 public class GridUtils : MonoBehaviour
 {
     public static GridUtils instance;
 
     public bool alreadyRotating = false;
-    
-    private int bombScore = 1000;
+    public int bombScore = 1000;
 
+    // Enums for hexagon group selection order
     enum Selection
     {
         TOP_LEFT = 1,
@@ -28,8 +29,10 @@ public class GridUtils : MonoBehaviour
 
     private Selection selection;
 
+    // Store previosly selected hexagon group to destroy it's outline
     private HexagonHolder[] previouslySelectedHexagonGroup;
 
+    // Struct to hold locations of neighbouring hexagons 
     public struct NeighbourHexagons
     {
         public Vector2 top;
@@ -40,12 +43,14 @@ public class GridUtils : MonoBehaviour
         public Vector2 bottomRight;
     }
 
+    // this holds hexagon pair with the same color
     public struct HexagonPair
     {
         public HexagonHolder first;
         public HexagonHolder second;
     }
 
+    // Holds array of hexagons that will explode
     HexagonHolder[] explosionList = new HexagonHolder[3];
 
     private void Awake()
@@ -55,12 +60,14 @@ public class GridUtils : MonoBehaviour
 
     private void Start()
     {
+        // initial values for previously selected hexagon group members
         previouslySelectedHexagonGroup = new HexagonHolder[3];
         previouslySelectedHexagonGroup[0] = GridManager.instance.gridList[0].m_allHexagons[0, 0];
         previouslySelectedHexagonGroup[1] = GridManager.instance.gridList[0].m_allHexagons[0, 1];
         previouslySelectedHexagonGroup[2] = GridManager.instance.gridList[0].m_allHexagons[1, 1];
     }
 
+    // Function to get neighbours of a hexagon
     private NeighbourHexagons GetNeighbourHexagons(HexagonHolder selectedHexagon)
     {
         //(selectedHexagon.yIndex % 2 == 0) ? selectedHexagon.yIndex - 1 : selectedHexagon.yIndex
@@ -74,6 +81,7 @@ public class GridUtils : MonoBehaviour
         return neighbours;
     }
 
+    // Returns a hexagon with a random color selected from the color list
     public GameObject GetRandomPiece()
     {
         int randomColorIndex = Random.Range(0, GridManager.instance.colorList.Count);
@@ -93,23 +101,32 @@ public class GridUtils : MonoBehaviour
         return hexagonToSpawn;
     }
 
+    // Sets hexagon x and y coordinates
     public void PlaceGamePiece(HexagonHolder hexagon, float xPos, float yPos, int x, int y)
     {
-        if (hexagon == null)
+        try
         {
+            hexagon.transform.position = new Vector3(xPos, yPos, 0);
+            hexagon.transform.rotation = Quaternion.identity;
+            hexagon.SetCoord(x, y);
+
+        }
+        catch (NullReferenceException ex)
+        {
+            Debug.Log(ex.ToString());
             return;
         }
-
-        hexagon.transform.position = new Vector3(xPos, yPos, 0);
-        hexagon.transform.rotation = Quaternion.identity;
-        hexagon.SetCoord(x,y);
+        
     }
 
+    // Fills grid with random hexagons
     public void FillRandom(int IndexForGrid)
     {
         int gridWidth = GridManager.instance.gridList[IndexForGrid].width;
         int gridHeight = GridManager.instance.gridList[IndexForGrid].height;
 
+        // Loop through the grid, find the correct x and y positions in the world and instantiate a hexagon with those values
+        // Also don't forget to initialize all hexagons array with i and j values for the given grid
         for (int i = 0; i < gridHeight; i++)
         {
             for (int j = 0; j < gridWidth; j++)
@@ -141,17 +158,23 @@ public class GridUtils : MonoBehaviour
         }
     }
 
+    // UserInputManager class will call this function when there is an input to set clicked cell
     public void SetClickedCell(GameObject cell, Grid grid, Vector2 mouseHitPos)
     {
         if (!alreadyRotating)
         {
+            // Set clicked cell
             grid.m_clickedCell = cell.GetComponent<Cell>();
+            // Set the selection direction relative our user input hit position
             SetSelection(cell.GetComponent<Cell>(), mouseHitPos);
-
+            // Find and set selected hexagon group
             grid.m_selectedHexagonGroup = FindHexagonGroup(grid.m_allHexagons[grid.m_clickedCell.yIndex, grid.m_clickedCell.xIndex], grid);
         }
     }
 
+    /*
+     *  Check input hit position relative to cell we hit and set selection
+     */
     public void SetSelection(Cell cell, Vector2 mouseHitPos)
     {
         // TOP LEFT
@@ -164,6 +187,7 @@ public class GridUtils : MonoBehaviour
         {
             selection = Selection.TOP_RIGHT;
         }
+        // TODO: Find a better way to check left and right selection - Currently not working - 
         // LEFT
         /*else if (mouseHitPos.x < cell.transform.position.x)
         {
@@ -186,6 +210,7 @@ public class GridUtils : MonoBehaviour
         }
     }
 
+    // Finds neighbours of a given hexagon then sets selected hexagon group
     public HexagonHolder[] FindHexagonGroup(HexagonHolder hexagon, Grid grid)
     {
         NeighbourHexagons neighbours = GetNeighbourHexagons(hexagon);
@@ -193,17 +218,27 @@ public class GridUtils : MonoBehaviour
         return SetHexagonGroup(hexagon, grid, hexagons, neighbours);
     }
 
+    // Calls DestroyOutlineShader function for every member of previouslySelectedHexagonGroup array
     public void DestroyOutline()
     {
-        if (GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[0].xIndex, previouslySelectedHexagonGroup[0].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[1].xIndex, previouslySelectedHexagonGroup[1].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[2].xIndex, previouslySelectedHexagonGroup[2].yIndex] != null)
+        try
         {
             GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[0].xIndex, previouslySelectedHexagonGroup[0].yIndex].DestroyOutlineShader();
             GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[1].xIndex, previouslySelectedHexagonGroup[1].yIndex].DestroyOutlineShader();
             GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[2].xIndex, previouslySelectedHexagonGroup[2].yIndex].DestroyOutlineShader();
         }
+        catch (NullReferenceException ex)
+        {
+            Debug.Log(ex.ToString());
+        }
+        /*if (GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[0].xIndex, previouslySelectedHexagonGroup[0].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[1].xIndex, previouslySelectedHexagonGroup[1].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[2].xIndex, previouslySelectedHexagonGroup[2].yIndex] != null)
+        {
+            
+        */
         
     }
 
+    
     public void CreateOutline(HexagonHolder[] hexagons)
     {
         hexagons[0].MakeOutline();
@@ -211,6 +246,7 @@ public class GridUtils : MonoBehaviour
         hexagons[2].MakeOutline();
     }
 
+    // Checks every possible group of hexagons for the selected hexagon
     private HexagonHolder[] SetHexagonGroup(HexagonHolder hexagon, Grid grid, HexagonHolder[] hexagons,
         NeighbourHexagons neighbours)
     {
@@ -353,6 +389,7 @@ public class GridUtils : MonoBehaviour
         return hexagons;
     }
 
+    // Checks every possible group for explosion, fills the explosion list
     private HexagonHolder[] CheckExplosionHexagonGroup(HexagonHolder hexagon, Grid grid, HexagonHolder[] hexagons,
         NeighbourHexagons neighbours)
     {
@@ -449,10 +486,14 @@ public class GridUtils : MonoBehaviour
         
         return hexagons;
     }
+
+    
     public void SetAlreadyRotation()
     {
         alreadyRotating = false;
     }
+    
+    // Starts rotation coroutine
     public void Rotate(bool clockwise)
     {
         if (!alreadyRotating)
@@ -463,6 +504,13 @@ public class GridUtils : MonoBehaviour
         }
     }
 
+    /*
+     * Rotates the selected hexagon group 3 times
+     *
+     *  With each rotation it check if there is a match and if there is that match explodes
+     *  After explosion this routine also calls hexagonfall and fillafterexplosion function
+     *
+     */
     private IEnumerator RotationRoutine(bool clockwise, Action SetAlreadyRotating)
     {
         HexagonHolder[] tempGroup = new HexagonHolder[3];
@@ -504,7 +552,7 @@ public class GridUtils : MonoBehaviour
     }
 
     
-
+    
     public void DecreaseBombTimers(List<HexagonHolder> bombList)
     {
         for (int i = 0; i < bombList.Count; i++)
@@ -514,6 +562,10 @@ public class GridUtils : MonoBehaviour
     }
 
     // Right now only works for 1 grid
+    // Checks every column for null places in all hexagons array
+    // for every null place it increases fallcount 
+    // finds the coordinates to where to start falling
+    // then starts to make every hexagon on that column fall by fallcount times
     public void MakeHexagonsFall()
     {
         int fallcount = 0;
@@ -552,7 +604,8 @@ public class GridUtils : MonoBehaviour
         }
     }
 
-    // We can find a better approach for this
+    // Check every column and get should spawn
+    // Instantiate hexagon shouldspawn times
     public void FillAfterExplosion()
     {
         List<HexagonHolder> tempList = new List<HexagonHolder>();
@@ -560,7 +613,7 @@ public class GridUtils : MonoBehaviour
         
 
         int shouldSpawncount = 0;
-        // Check every column and get fall count
+        // Check every column and get should spawn count
         for (int i = 0; i < GridManager.instance.gridList[0].width; i++)
         {
             shouldSpawncount = 0;
@@ -585,14 +638,6 @@ public class GridUtils : MonoBehaviour
                 }
             }
         }
-
-        /*if ((tempList[0].color == tempList[1].color) || (tempList[2].color == tempList[0].color))
-        {
-            int randomIdx = Random.Range(0, 2);
-            int randomColorIdx = Random.Range(0, GridManager.instance.colorList.Count - 1);
-            tempList[randomIdx].color = GridManager.instance.colorList[randomColorIdx];
-        }*/
-
         if (bombScore - UIManager.instance.score <= 0)
         {
             //Create a bomb
@@ -601,9 +646,11 @@ public class GridUtils : MonoBehaviour
             GridManager.instance.bombList.Add(tempList[bombIndex]);
             bombScore += 1000;
         }
-
+        // Also checks if spawned hexagons have matches
+        // if there is a match explode
         ExplodeStartingMatches(true);
 
+        // Check if there are any possible moves. If not then end the game.
         if (!CheckPossibleMoves())
         {
             Debug.Log("Game End");
@@ -612,6 +659,7 @@ public class GridUtils : MonoBehaviour
 
     }
 
+    // Fills the explosion list. if explosion list is not null then it starts exploding
     public bool CheckMatch(HexagonHolder hexagon, Grid grid)
     {
         
@@ -633,6 +681,7 @@ public class GridUtils : MonoBehaviour
 
     }
 
+    // Destroys hexagon gameobjects and clears allhexagons array
     public bool ExplodeGroup(HexagonHolder[] explosionList, Grid grid)
     {
         // Clear hexagons from the grid
@@ -642,6 +691,7 @@ public class GridUtils : MonoBehaviour
             {
                 GridManager.instance.bombList.Remove(explosionList[i]);
             }
+            ParticleManager.instance.ShowParticle(new Vector2(explosionList[i].transform.position.x, explosionList[i].transform.position.y), explosionList[i].color);
             grid.m_allHexagons[explosionList[i].xIndex, explosionList[i].yIndex] = null;
             Destroy(explosionList[i].gameObject);
         }
@@ -652,21 +702,24 @@ public class GridUtils : MonoBehaviour
 
     //TODO: Change this function to support multiple grids
     // Right now only for first grid
+    // Finds the middle point for selected hexagon group
     public Vector2 FindMiddlePoint()
     {
         Vector2 middlePos = Vector2.zero;
         for (int i = 0; i < 3; i++)
         {
+            // Gets the sum of x and y world coordinates
             middlePos.x += GridManager.instance.gridList[0].m_selectedHexagonGroup[i].transform.position.x;
             middlePos.y += GridManager.instance.gridList[0].m_selectedHexagonGroup[i].transform.position.y;
         }
-
+        // Finds the middle
         middlePos.x = middlePos.x / 3;
         middlePos.y = middlePos.y / 3;
         return middlePos;
     }
 
     // Currently works for only the first grid
+    // Makes a single hexagon fall by starting its animation and setting its new coordinates
     public void FallSingleHexagon(int x, int y, int newX, int newY)
     {
         /*
@@ -681,6 +734,7 @@ public class GridUtils : MonoBehaviour
         GridManager.instance.gridList[0].m_allHexagons[newX, newY] = currentHexagon;
     }
 
+    // Sets the new coordinates for rotating group and starts the rotation animation
     public void SwapHexagonGroup(bool clockwise)
     {
         // For now we only rotate for the first grid
@@ -752,6 +806,16 @@ public class GridUtils : MonoBehaviour
     // Checks if there are possible moves and if not game ends
     // TODO: We might want to find a better way to do this
     // This is an expensive function
+    /*
+     * Basically checks neighbour neighbours of a given hexagon pair
+     *  For example if the pair is top and bottom we need to find left and right neighbours. Then we find their neighbours and if there are more than 4 hexagons with the same color that means there are possible moves
+     *          purple              purple
+     *      |    4,6     |           6,6
+     *    -3,6-        -5,6-   red
+     *      |    4,7     |           6,7
+     *          purple     5,7      yellow
+     *     3,7
+     */
     public bool CheckPossibleMoves()
     {
         List<List<HexagonPair>> pairList = new List<List<HexagonPair>>();
@@ -795,7 +859,7 @@ public class GridUtils : MonoBehaviour
 
     }
 
-    
+    // Finds the same color count for every pair
     public bool CheckNeighbouringGroupForColor(HexagonPair pair)
     {
         int samecolorCount = 0;
@@ -1029,6 +1093,8 @@ public class GridUtils : MonoBehaviour
         
     }
 
+    // Only works for the first grid right now
+    // For every hexagon in the first grid check pairs
     public List<HexagonPair> FindPairGroup(HexagonHolder currentHexagon)
     {
         Grid currentGrid = GridManager.instance.gridList[0];
@@ -1091,6 +1157,7 @@ public class GridUtils : MonoBehaviour
         return allPairs;
     }
 
+    // Check every column in the first grid and if there is a match explode
     public void ExplodeStartingMatches(bool shouldAddScore)
     {
         Grid currentGrid = GridManager.instance.gridList[0];

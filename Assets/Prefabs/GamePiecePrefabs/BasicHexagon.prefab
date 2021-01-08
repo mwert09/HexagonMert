@@ -102,9 +102,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44cc8a30d951e604ab132568e8aa8207, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 1, g: 0.9813726, b: 0, a: 1}
   xIndex: 0
   yIndex: 0
+  color: {r: 0.6603774, g: 0.109024554, b: 0.52744263, a: 1}
   rotationSpeed: 5
   OutlineMaterial: {fileID: 2100000, guid: 22ee70bb783a84143b49a6ac9d6cd6c4, type: 2}
   DefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}

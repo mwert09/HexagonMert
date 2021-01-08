@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/* ------------ OLD ---------------  DEPRECATED ---------------- WE DON'T USE SCRIPTABLE OBJECTS ANYMORE */
+
 [CreateAssetMenu(menuName = "ScriptableObjects/HexagonPiece")]
 public class HexagonPieceSO : ScriptableObject
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 
+/* Hexagon game piece */
 public class HexagonHolder : MonoBehaviour
 {
     /*
@@ -14,22 +15,28 @@ public class HexagonHolder : MonoBehaviour
      *
      */
     //public HexagonPieceSO hexagon;
-    public Color color;
+    [Header("Hexagon")]
     public int xIndex;
     public int yIndex;
-    public int rotationSpeed;
+    public Color color;
+    [Range(5.0f, 50.0f) ] public int rotationSpeed;
 
+    /*Variables for rotate animation*/
     private bool animate = false;
     private Vector2 newPosToAnimate;
     private Vector2 middle;
     private bool clockwise;
 
+    /*Variables for fall animation*/
     private bool is_falling = false;
     private float fallXCoord;
     private float fallYCoord;
 
+    /*Variables for shader*/
+    [Header("Shader")]
     public Material OutlineMaterial;
     public Material DefaultMaterial;
+
 
     [Header("Bomb Part")]
     public bool isBomb;
@@ -40,12 +47,14 @@ public class HexagonHolder : MonoBehaviour
 
     private void Awake()
     {
+        // Set color of hexagons
         GetComponent<SpriteRenderer>().color = color;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        // If this hexagon is a bomb then change it's sprite and start showing bomb countdown text
         if (isBomb)
         {
             GetComponent<SpriteRenderer>().sprite = bombSprite;
@@ -64,7 +73,6 @@ public class HexagonHolder : MonoBehaviour
         if (animate)
         {
             // Get the middle point to rotate around
-
             if (clockwise)
             {
                 transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * 120.0f * rotationSpeed);
@@ -73,19 +81,20 @@ public class HexagonHolder : MonoBehaviour
             {
                 transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * -120.0f * rotationSpeed);
             }
-            
-            if (Vector3.Distance(transform.position, newPosToAnimate) < 0.3f)
+            // If hexagon is close to destination set it's new x,y coordinates and also reset any rotation applied before
+            if (Vector3.Distance(transform.position, newPosToAnimate) < 0.1f)
             {
                 transform.position = newPosToAnimate;
                 transform.rotation  = Quaternion.Euler(0,0,0);
                 animate = false;
-                
             }
         }
 
         if (is_falling)
         {
+            // start falling
             transform.position = new Vector3(fallXCoord, Mathf.Lerp(transform.position.y, fallYCoord, 0.2f), 0f);
+            // If hexagon is close to destination set it's new x,y coordinates and also reset any rotation applied before
             if (Vector3.Distance(transform.position, new Vector3(fallXCoord, fallYCoord, 0f)) < 0.1f)
             {
                 transform.position = new Vector3(fallXCoord, fallYCoord, 0f);
@@ -117,6 +126,7 @@ public class HexagonHolder : MonoBehaviour
         is_falling = true;
     }
 
+    /*Decreases bomb countdown by 1 also checks if it is exploded or not*/
     public void DecreaseBombTimer()
     {
         movesBeforeExplosion--;
@@ -127,12 +137,14 @@ public class HexagonHolder : MonoBehaviour
         }
     }
 
+    // Changes sprite material to make a little glow around selected hexagon group
     public void MakeOutline()
     {
         gameObject.GetComponent<SpriteRenderer>().material = OutlineMaterial;
         
     }
 
+    // Changes sprite material to default 
     public void DestroyOutlineShader()
     {
         gameObject.GetComponent<SpriteRenderer>().material = DefaultMaterial;

@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ *  We use cell class for raycast hit detection.
+ *
+ *  
+ */
 public class Cell : MonoBehaviour
 {
     public int xIndex;

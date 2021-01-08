@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,19 +9,21 @@ using UnityEngine.UIElements;
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
-
+    [Header("Score")]
     public int scoreAmount = 15;
+    public int score;
 
-    public Text scoreText;
-    public Text movesText;
-    public Text gameOverText;
-    public Text gameOverScoreText;
+    [Header("Moves")]
+    public int moves;
 
+    [Header("UI Objects")]
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI movesText;
+    public TextMeshProUGUI gameOverText;
+    public TextMeshProUGUI gameOverScoreText;
+    [Header("Panels")]
     public GameObject pausePanel;
     public GameObject gameOverPanel;
-
-    public int score;
-    public int moves;
 
     private void Awake()
     {
@@ -31,9 +35,18 @@ public class UIManager : MonoBehaviour
     {
         score = 0;
         moves = 0;
-        scoreText.text = score.ToString();
-        movesText.text = moves.ToString();
-        UpdateUI();
+        try
+        {
+            scoreText.text = score.ToString();
+            movesText.text = moves.ToString();
+            UpdateUI();
+        }
+        catch (NullReferenceException ex)
+        {
+            Debug.Log(ex.ToString());
+        }
+        
+        
     }
 
     // Update is called once per frame
@@ -62,16 +75,21 @@ public class UIManager : MonoBehaviour
 
     public void PauseButtonPressed()
     {
-        GameFlowManager.instance.paused = true;
+        GameFlowManager.instance.SetPaused(true);
         pausePanel.SetActive(true);
         Time.timeScale = 0;
     }
 
     public void ResumeButtonPressed()
     {
-        GameFlowManager.instance.paused = false;
+        GameFlowManager.instance.SetPaused(false);
         pausePanel.SetActive(false);
         Time.timeScale = 1;
+    }
+
+    public void MainMenuPressed()
+    {
+        LevelManager.instance.LoadLevel(0);
     }
 
     public void ShowGameOverPanel()
@@ -82,10 +100,7 @@ public class UIManager : MonoBehaviour
 
     public void RestartButtonPressed()
     {
-        gameOverPanel.SetActive(false);
-        pausePanel.SetActive(false);
-        // Reload the level
-        LevelManager.instance.LoadLevel(0);
+        LevelManager.instance.LoadLevel(1);
     }
 
     public void ExitButtonPressed()
