@@ -28,6 +28,9 @@ public class HexagonHolder : MonoBehaviour
     private float fallXCoord;
     private float fallYCoord;
 
+    public Material OutlineMaterial;
+    public Material DefaultMaterial;
+
     [Header("Bomb Part")]
     public bool isBomb;
     public Sprite bombSprite;
@@ -57,6 +60,7 @@ public class HexagonHolder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (animate)
         {
             // Get the middle point to rotate around
@@ -65,16 +69,17 @@ public class HexagonHolder : MonoBehaviour
             {
                 transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * 120.0f * rotationSpeed);
             }
-            else
+            if(!clockwise)
             {
                 transform.RotateAround(middle, new Vector3(0, 0, 1), Time.deltaTime * -120.0f * rotationSpeed);
             }
             
-            if (Vector3.Distance(transform.position, newPosToAnimate) < 0.1f)
+            if (Vector3.Distance(transform.position, newPosToAnimate) < 0.3f)
             {
                 transform.position = newPosToAnimate;
                 transform.rotation  = Quaternion.Euler(0,0,0);
                 animate = false;
+                
             }
         }
 
@@ -118,8 +123,20 @@ public class HexagonHolder : MonoBehaviour
         bombText.GetComponent<TextMesh>().text = movesBeforeExplosion.ToString();
         if (movesBeforeExplosion == 0)
         {
-            GameFlowManager.instance.SetGameEnd();
+            GameFlowManager.instance.SetGameEnd("BOOOOM!");
         }
+    }
+
+    public void MakeOutline()
+    {
+        gameObject.GetComponent<SpriteRenderer>().material = OutlineMaterial;
+        
+    }
+
+    public void DestroyOutlineShader()
+    {
+        gameObject.GetComponent<SpriteRenderer>().material = DefaultMaterial;
+        
     }
     
 }

@@ -23,17 +23,15 @@ public class GameFlowManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameEnd)
-        {
-
-        } 
+        
     }
 
-    public void SetGameEnd()
+    public void SetGameEnd(string reason)
     {
         gameEnd = true;
         paused = true;
         // Activate panel
-
+        UIManager.instance.gameOverText.text = reason;
+        UIManager.instance.ShowGameOverPanel();
     }
 }

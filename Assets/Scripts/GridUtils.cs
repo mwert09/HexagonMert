@@ -28,6 +28,8 @@ public class GridUtils : MonoBehaviour
 
     private Selection selection;
 
+    private HexagonHolder[] previouslySelectedHexagonGroup;
+
     public struct NeighbourHexagons
     {
         public Vector2 top;
@@ -49,6 +51,14 @@ public class GridUtils : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    private void Start()
+    {
+        previouslySelectedHexagonGroup = new HexagonHolder[3];
+        previouslySelectedHexagonGroup[0] = GridManager.instance.gridList[0].m_allHexagons[0, 0];
+        previouslySelectedHexagonGroup[1] = GridManager.instance.gridList[0].m_allHexagons[0, 1];
+        previouslySelectedHexagonGroup[2] = GridManager.instance.gridList[0].m_allHexagons[1, 1];
     }
 
     private NeighbourHexagons GetNeighbourHexagons(HexagonHolder selectedHexagon)
@@ -183,6 +193,24 @@ public class GridUtils : MonoBehaviour
         return SetHexagonGroup(hexagon, grid, hexagons, neighbours);
     }
 
+    public void DestroyOutline()
+    {
+        if (GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[0].xIndex, previouslySelectedHexagonGroup[0].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[1].xIndex, previouslySelectedHexagonGroup[1].yIndex] != null && GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[2].xIndex, previouslySelectedHexagonGroup[2].yIndex] != null)
+        {
+            GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[0].xIndex, previouslySelectedHexagonGroup[0].yIndex].DestroyOutlineShader();
+            GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[1].xIndex, previouslySelectedHexagonGroup[1].yIndex].DestroyOutlineShader();
+            GridManager.instance.gridList[0].m_allHexagons[previouslySelectedHexagonGroup[2].xIndex, previouslySelectedHexagonGroup[2].yIndex].DestroyOutlineShader();
+        }
+        
+    }
+
+    public void CreateOutline(HexagonHolder[] hexagons)
+    {
+        hexagons[0].MakeOutline();
+        hexagons[1].MakeOutline();
+        hexagons[2].MakeOutline();
+    }
+
     private HexagonHolder[] SetHexagonGroup(HexagonHolder hexagon, Grid grid, HexagonHolder[] hexagons,
         NeighbourHexagons neighbours)
     {
@@ -200,6 +228,16 @@ public class GridUtils : MonoBehaviour
 
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.topLeft.x, (int) neighbours.topLeft.y];
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.top.x, (int) neighbours.top.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y];
+
+                
+                CreateOutline(hexagons);
+
                 break;
             case Selection.TOP_RIGHT:
                 if (neighbours.top.x < 0 || neighbours.top.x > (grid.width - 1) || neighbours.top.y < 0 ||
@@ -211,6 +249,15 @@ public class GridUtils : MonoBehaviour
                 }
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.top.x, (int) neighbours.top.y];
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.topRight.x, (int) neighbours.topRight.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.top.x, (int)neighbours.top.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y];
+
+                
+                CreateOutline(hexagons);
                 break;
             case Selection.LEFT:
                 if (neighbours.topLeft.x < 0 || neighbours.topLeft.x > (grid.width - 1) || neighbours.topLeft.y < 0 ||
@@ -223,6 +270,15 @@ public class GridUtils : MonoBehaviour
 
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.topLeft.x, (int) neighbours.topLeft.y];
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.bottomLeft.x, (int) neighbours.bottomLeft.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.topLeft.x, (int)neighbours.topLeft.y];
+
+                
+                CreateOutline(hexagons);
                 break;
             case Selection.RIGHT:
                 if (neighbours.topRight.x < 0 || neighbours.topRight.x > (grid.width - 1) || neighbours.topRight.y < 0 ||
@@ -235,6 +291,15 @@ public class GridUtils : MonoBehaviour
 
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.topRight.x, (int) neighbours.topRight.y];
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.bottomRight.x, (int) neighbours.bottomRight.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.topRight.x, (int)neighbours.topRight.y];
+
+                
+                CreateOutline(hexagons);
                 break;
             case Selection.BOTTOM_LEFT:
                 if (neighbours.bottomLeft.x < 0 || neighbours.bottomLeft.x > (grid.width - 1) || neighbours.bottomLeft.y < 0 ||
@@ -247,6 +312,15 @@ public class GridUtils : MonoBehaviour
 
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.bottom.x, (int) neighbours.bottom.y];
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.bottomLeft.x, (int) neighbours.bottomLeft.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.bottomLeft.x, (int)neighbours.bottomLeft.y];
+
+                
+                CreateOutline(hexagons);
                 break;
             case Selection.BOTTOM_RIGHT:
                 if (neighbours.bottomRight == null || neighbours.bottom == null || neighbours.bottomRight.x < 0 || neighbours.bottomRight.x > (grid.width - 1) || neighbours.bottomRight.y < 0 ||
@@ -259,6 +333,15 @@ public class GridUtils : MonoBehaviour
 
                 hexagons[1] = grid.m_allHexagons[(int) neighbours.bottomRight.x, (int) neighbours.bottomRight.y];
                 hexagons[2] = grid.m_allHexagons[(int) neighbours.bottom.x, (int) neighbours.bottom.y];
+
+                DestroyOutline();
+
+                previouslySelectedHexagonGroup[0] = hexagon;
+                previouslySelectedHexagonGroup[1] = grid.m_allHexagons[(int)neighbours.bottomRight.x, (int)neighbours.bottomRight.y];
+                previouslySelectedHexagonGroup[2] = grid.m_allHexagons[(int)neighbours.bottom.x, (int)neighbours.bottom.y];
+
+                
+                CreateOutline(hexagons);
                 break;
             default:
                 hexagons[1] = null;
@@ -366,49 +449,61 @@ public class GridUtils : MonoBehaviour
         
         return hexagons;
     }
-
+    public void SetAlreadyRotation()
+    {
+        alreadyRotating = false;
+    }
     public void Rotate(bool clockwise)
     {
         if (!alreadyRotating)
         {
             alreadyRotating = true; 
-            StartCoroutine(RotationRoutine(clockwise));
+            StartCoroutine(RotationRoutine(clockwise, SetAlreadyRotation));
+            
         }
     }
 
-    private IEnumerator RotationRoutine(bool clockwise)
+    private IEnumerator RotationRoutine(bool clockwise, Action SetAlreadyRotating)
     {
         HexagonHolder[] tempGroup = new HexagonHolder[3];
-        tempGroup[0] = GridManager.instance.gridList[0].m_selectedHexagonGroup[0];
-        tempGroup[1] = GridManager.instance.gridList[0].m_selectedHexagonGroup[1];
-        tempGroup[2] = GridManager.instance.gridList[0].m_selectedHexagonGroup[2];
-        // Rotate hexagon group and check game board if there is an explosion(3 color match) break the loop
-        for (int i = 0; i < 3; i++)
+        if (GridManager.instance.gridList[0].m_selectedHexagonGroup[0] != null &&
+            GridManager.instance.gridList[0].m_selectedHexagonGroup[1] != null &&
+            GridManager.instance.gridList[0].m_selectedHexagonGroup[2] != null)
         {
-            
-            SwapHexagonGroup(clockwise);
-            yield return new WaitForSeconds(0.3f);
-
-            // Check every group member for possible matches
-            // For now we only check for first grid - we will change this function later
-            if (CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[0],
-                    GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[1],
-                GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[2],
-                GridManager.instance.gridList[0]))
+            tempGroup[0] = GridManager.instance.gridList[0].m_selectedHexagonGroup[0];
+            tempGroup[1] = GridManager.instance.gridList[0].m_selectedHexagonGroup[1];
+            tempGroup[2] = GridManager.instance.gridList[0].m_selectedHexagonGroup[2];
+            // Rotate hexagon group and check game board if there is an explosion(3 color match) break the loop
+            for (int i = 0; i < 3; i++)
             {
-                UIManager.instance.IncreaseMoves();
-                DecreaseBombTimers(GridManager.instance.bombList);
-               MakeHexagonsFall();
-                break;
-                   
-            }
-        }
-        
-        FillAfterExplosion();
-        alreadyRotating = false;
 
-        
+                SwapHexagonGroup(clockwise);
+                yield return new WaitForSeconds(0.3f);
+
+                // Check every group member for possible matches
+                // For now we only check for first grid - we will change this function later
+                if (CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[0],
+                    GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[1],
+                    GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[2],
+                    GridManager.instance.gridList[0]))
+                {
+                    UIManager.instance.IncreaseMoves();
+                    UserInputManager.instance.groupSelected = false;
+                    DecreaseBombTimers(GridManager.instance.bombList);
+                    MakeHexagonsFall();
+                    FillAfterExplosion();
+                    DestroyOutline();
+                    break;
+
+                }
+            }
+
+        }
+
+        SetAlreadyRotating();
     }
+
+    
 
     public void DecreaseBombTimers(List<HexagonHolder> bombList)
     {
@@ -501,7 +596,7 @@ public class GridUtils : MonoBehaviour
         if (bombScore - UIManager.instance.score <= 0)
         {
             //Create a bomb
-            int bombIndex = Random.Range(0, tempList.Count);
+            int bombIndex = Random.Range(0, tempList.Count - 1);
             tempList[bombIndex].isBomb = true;
             GridManager.instance.bombList.Add(tempList[bombIndex]);
             bombScore += 1000;
@@ -512,7 +607,7 @@ public class GridUtils : MonoBehaviour
         if (!CheckPossibleMoves())
         {
             Debug.Log("Game End");
-            GameFlowManager.instance.SetGameEnd();
+            GameFlowManager.instance.SetGameEnd("No possible match available!");
         }
 
     }
@@ -543,6 +638,10 @@ public class GridUtils : MonoBehaviour
         // Clear hexagons from the grid
         for (int i = 0; i < 3; i++)
         {
+            if (explosionList[i].isBomb)
+            {
+                GridManager.instance.bombList.Remove(explosionList[i]);
+            }
             grid.m_allHexagons[explosionList[i].xIndex, explosionList[i].yIndex] = null;
             Destroy(explosionList[i].gameObject);
         }

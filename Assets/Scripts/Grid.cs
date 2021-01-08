@@ -29,6 +29,10 @@ public class Grid : MonoBehaviour
         // Initialize cell array
         m_allCells = new Cell[width, height];
         m_allHexagons = new HexagonHolder[width, height];
+        m_selectedHexagonGroup = new HexagonHolder[3];
+        m_selectedHexagonGroup[0] = null;
+        m_selectedHexagonGroup[1] = null;
+        m_selectedHexagonGroup[2] = null;
     }
 
     // Start is called before the first frame update

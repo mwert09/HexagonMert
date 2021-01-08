@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 95238b0062801d9468314d3ed0e48901, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 30899666e36d1644ca131367f7a74c81, type: 3}
   m_Color: {r: 0.126157, g: 0.4498508, b: 0.990566, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -106,6 +106,8 @@ MonoBehaviour:
   xIndex: 0
   yIndex: 0
   rotationSpeed: 5
+  OutlineMaterial: {fileID: 2100000, guid: 22ee70bb783a84143b49a6ac9d6cd6c4, type: 2}
+  DefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   isBomb: 0
   bombSprite: {fileID: 21300000, guid: 029c2cedac787ac41a13818fa7759234, type: 3}
   movesBeforeExplosion: 10

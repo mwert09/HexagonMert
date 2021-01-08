@@ -12,8 +12,11 @@ public class UIManager : MonoBehaviour
 
     public Text scoreText;
     public Text movesText;
+    public Text gameOverText;
+    public Text gameOverScoreText;
 
     public GameObject pausePanel;
+    public GameObject gameOverPanel;
 
     public int score;
     public int moves;
@@ -69,6 +72,20 @@ public class UIManager : MonoBehaviour
         GameFlowManager.instance.paused = false;
         pausePanel.SetActive(false);
         Time.timeScale = 1;
+    }
+
+    public void ShowGameOverPanel()
+    {
+        gameOverScoreText.text = score.ToString();
+        gameOverPanel.SetActive(true);
+    }
+
+    public void RestartButtonPressed()
+    {
+        gameOverPanel.SetActive(false);
+        pausePanel.SetActive(false);
+        // Reload the level
+        LevelManager.instance.LoadLevel(0);
     }
 
     public void ExitButtonPressed()
