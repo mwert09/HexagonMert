@@ -38,13 +38,13 @@ public class CameraController : MonoBehaviour
 
             // Change camera position based on width and height
             mainCamera.transform.position = new Vector3((float)(width - 1) / 2f,
-                -(float)(height + borderSize) / 2f, -10f);
+                -(float)(height + 2) / 2f, -10f);
 
             //float aspectRatio = (float) width / (float) height;
             //float verticalSize = height + borderSize;
             // float horizontalSize = width + borderSize;
-            float verticalSize = height;
-            float horizontalSize = width;
+            float verticalSize = height + 1;
+            float horizontalSize = width + 1;
 
             mainCamera.orthographicSize = (verticalSize > horizontalSize) ? verticalSize : horizontalSize;
         }
