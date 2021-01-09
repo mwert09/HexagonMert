@@ -547,6 +547,7 @@ public class GridUtils : MonoBehaviour
                     GridManager.instance.gridList[0]) || CheckMatch(GridManager.instance.gridList[0].m_selectedHexagonGroup[2],
                     GridManager.instance.gridList[0]))
                 {
+                    ExplodeStartingMatches(true);
                     UIManager.instance.IncreaseMoves();
                     UserInputManager.instance.groupSelected = false;
                     DecreaseBombTimers(GridManager.instance.bombList);
@@ -1197,93 +1198,101 @@ public class GridUtils : MonoBehaviour
     public void ExplodeStartingMatches(bool shouldAddScore)
     {
         Grid currentGrid = GridManager.instance.gridList[0];
-        for (int i = 0; i < currentGrid.width; i++)
+        try
         {
-            for (int j = 0; j < currentGrid.height - 1; j++)
+            for (int i = 0; i < currentGrid.width; i++)
             {
-                if (i == 0)
+                for (int j = 0; j < currentGrid.height - 1; j++)
                 {
-                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    if (i == 0)
                     {
-                        // check right
-                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
-                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
                         {
-                            // Explode
-                            HexagonHolder[] explosionList = new HexagonHolder[3];
-                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
-                            explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
-                            explosionList[2] = (tempHexagon);
-                            if (ExplodeGroup(explosionList, currentGrid))
+                            // check right
+                            HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
+                            if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
                             {
-                                if (shouldAddScore)
+                                // Explode
+                                HexagonHolder[] explosionList = new HexagonHolder[3];
+                                explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                                explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
+                                explosionList[2] = (tempHexagon);
+                                if (ExplodeGroup(explosionList, currentGrid))
                                 {
-                                    UIManager.instance.IncreaseScore();
+                                    if (shouldAddScore)
+                                    {
+                                        UIManager.instance.IncreaseScore();
+                                    }
+                                    MakeHexagonsFall();
+                                    FillAfterExplosion();
                                 }
-                                MakeHexagonsFall();
-                                FillAfterExplosion();
                             }
                         }
                     }
-                }
-                if(i == currentGrid.width - 1)
-                {
-                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    if (i == currentGrid.width - 1)
                     {
-                        // check left
-                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
-                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
                         {
-                            // Explode
-                            HexagonHolder[] explosionList = new HexagonHolder[3];
-                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
-                            explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
-                            explosionList[2] = (tempHexagon);
-                            if (ExplodeGroup(explosionList, currentGrid))
+                            // check left
+                            HexagonHolder tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
+                            if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
                             {
-                                MakeHexagonsFall();
-                                FillAfterExplosion();
+                                // Explode
+                                HexagonHolder[] explosionList = new HexagonHolder[3];
+                                explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                                explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
+                                explosionList[2] = (tempHexagon);
+                                if (ExplodeGroup(explosionList, currentGrid))
+                                {
+                                    MakeHexagonsFall();
+                                    FillAfterExplosion();
+                                }
                             }
                         }
                     }
-                }
-                if(i > 0 && i < currentGrid.width - 1)
-                {
-                    if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
+                    if (i > 0 && i < currentGrid.width - 1)
                     {
-                        // check both sides
-                        HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
-                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
+                        if (currentGrid.m_allHexagons[i, j].color == currentGrid.m_allHexagons[i, j + 1].color)
                         {
-                            // Explode
-                            HexagonHolder[] explosionList = new HexagonHolder[3];
-                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
-                            explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
-                            explosionList[2] = (tempHexagon);
-                            if (ExplodeGroup(explosionList, currentGrid))
+                            // check both sides
+                            HexagonHolder tempHexagon = currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1];
+                            if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
                             {
-                                MakeHexagonsFall();
-                                FillAfterExplosion();
+                                // Explode
+                                HexagonHolder[] explosionList = new HexagonHolder[3];
+                                explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                                explosionList[1] = (currentGrid.m_allHexagons[i + 1, (i % 2 == 0) ? j : j + 1]);
+                                explosionList[2] = (tempHexagon);
+                                if (ExplodeGroup(explosionList, currentGrid))
+                                {
+                                    MakeHexagonsFall();
+                                    FillAfterExplosion();
+                                }
                             }
-                        }
-                        tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
-                        if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
-                        {
-                            // Explode
-                            HexagonHolder[] explosionList = new HexagonHolder[3];
-                            explosionList[0] = (currentGrid.m_allHexagons[i, j]);
-                            explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
-                            explosionList[2] = (tempHexagon);
-                            if (ExplodeGroup(explosionList, currentGrid))
+                            tempHexagon = currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1];
+                            if (currentGrid.m_allHexagons[i, j].color == tempHexagon.color)
                             {
-                                MakeHexagonsFall();
-                                FillAfterExplosion();
+                                // Explode
+                                HexagonHolder[] explosionList = new HexagonHolder[3];
+                                explosionList[0] = (currentGrid.m_allHexagons[i, j]);
+                                explosionList[1] = (currentGrid.m_allHexagons[i - 1, (i % 2 == 0) ? j : j + 1]);
+                                explosionList[2] = (tempHexagon);
+                                if (ExplodeGroup(explosionList, currentGrid))
+                                {
+                                    MakeHexagonsFall();
+                                    FillAfterExplosion();
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        catch (NullReferenceException ex)
+        {
+
+        }
+       
     }
 
 }
